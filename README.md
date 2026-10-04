@@ -2,9 +2,9 @@
 
 **EECS 449 · Extra Credit 1 · Fall 2026**
 
-**Name:** Hunter Broughton
-**UMID:** `<<FILL IN BEFORE SUBMITTING>>`
-**uniqname:** huntbro
+- **Name:** Hunter Broughton
+- **UMID:** `<<FILL IN BEFORE SUBMITTING>>`
+- **uniqname:** huntbro
 
 Arbor is the planner I actually want for a semester of EECS: it holds my
 courses, reads a deadline out of a sentence I typed in a hurry, ranks
@@ -302,8 +302,8 @@ Jac an app may not import another app's `node` or `edge` at all (`E5108`), so
 this isn't a convention I maintained by hand — the compiler enforces it. The
 three clients import only functions and the plain `obj` views in
 `core/contracts.jac`, which is why there is exactly one definition of what a
-task is across four compilation targets and the type checker verifies all of
-them.
+task is across all four apps — and `jac check` type-checks every one of them
+against it.
 
 **Storage is the graph.** There is no database and no ORM. A signed-in user's
 subgraph is:
@@ -415,7 +415,7 @@ The suite covers the parts worth pinning down: calendar arithmetic
 (`core/timeutil.test.jac`), the ranking and scheduling rules
 (`core/ranking.test.jac` — ordering, non-overlapping blocks, budget and
 working-window limits, nothing silently dropped), the natural-language parser
-across roughly forty capture phrasings and the model-output validator
+across dozens of capture phrasings and the model-output validator
 (`core/ai.test.jac`), graph behaviour including walker deduplication and
 streak counting (`core/planner.test.jac`), and the CLI's argument surface and
 task-handle resolution (`cli/`).

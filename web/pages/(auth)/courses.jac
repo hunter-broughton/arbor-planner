@@ -1,5 +1,7 @@
 """Courses -- the term at a glance, and what each class is costing you."""
 
+import from "@jac/runtime" { jacLogout, useNavigate }
+
 import from core.planner {
     CourseView,
     TaskView,
@@ -12,7 +14,7 @@ import from core.planner {
     toggle_task
 }
 import from web.components.TaskList { TaskList }
-import from web.fmt { duration }
+import from web.fmt { duration, is_auth_error }
 
 
 def:pub page -> JsxPage {
@@ -26,6 +28,15 @@ def:pub page -> JsxPage {
         loading: bool = True,
         error: str = "";
 
+    navigate = useNavigate();
+
+    # A stored token the server no longer accepts: drop it and start over,
+    # rather than rendering an empty planner.
+    def signOut {
+        jacLogout();
+        navigate("/login", {"replace": True});
+    }
+
     async can with entry {
         await load();
     }
@@ -36,8 +47,12 @@ def:pub page -> JsxPage {
         try {
             freshCourses = await list_courses();
             freshTasks = await list_tasks(True, "");
-        } except Exception {
+        } except Exception as e {
             loading = False;
+            if is_auth_error(e) {
+                signOut();
+                return;
+            }
             error = "Could not reach the planner service.";
             return;
         }

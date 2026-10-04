@@ -55,6 +55,9 @@ test "kind is inferred from how students actually talk" {
     assert kind_name(heuristic_parse("reading chapter 3", TODAY, COURSES).kind) == "reading";
     assert kind_name(heuristic_parse("gym", TODAY, COURSES).kind) == "fitness";
     assert kind_name(heuristic_parse("email advisor", TODAY, COURSES).kind) == "admin";
+    # "final exam" is an exam; a "final writeup" is still an assignment.
+    assert kind_name(heuristic_parse("final exam", TODAY, COURSES).kind) == "exam";
+    assert kind_name(heuristic_parse("final writeup", TODAY, COURSES).kind) == "assignment";
 }
 
 test "unstated priority is implied, stated priority is obeyed" {

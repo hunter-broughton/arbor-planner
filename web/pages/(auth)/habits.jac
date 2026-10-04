@@ -5,6 +5,8 @@ every goal with its streak computed and the fourteen-day window resolved, so
 there is nothing left for this page to work out.
 """
 
+import from "@jac/runtime" { jacLogout, useNavigate }
+
 import from core.planner {
     AgendaView,
     add_goal,
@@ -25,6 +27,15 @@ def:pub page -> JsxPage {
         adding: bool = False,
         error: str = "";
 
+    navigate = useNavigate();
+
+    # A stored token the server no longer accepts: drop it and start over,
+    # rather than rendering an empty planner.
+    def signOut {
+        jacLogout();
+        navigate("/login", {"replace": True});
+    }
+
     async can with entry {
         await load();
     }
@@ -33,8 +44,12 @@ def:pub page -> JsxPage {
         fresh: AgendaView = AgendaView();
         try {
             fresh = await agenda("");
-        } except Exception {
+        } except Exception as e {
             loading = False;
+            if is_auth_error(e) {
+                signOut();
+                return;
+            }
             error = "Could not reach the planner service.";
             return;
         }

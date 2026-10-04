@@ -68,7 +68,13 @@ do not break just because today is not finished yet.
 **Per-user accounts.** Every endpoint runs against the caller's own graph, so
 two students on one deployment never see each other's work.
 
-![The week view](docs/web-week.png)
+<p align="center">
+  <img src="docs/web-week.png" width="49%" alt="The week view">
+  <img src="docs/web-courses.png" width="49%" alt="Courses with workload rolled up">
+</p>
+<p align="center">
+  <img src="docs/web-habits.png" width="49%" alt="Habits and streaks">
+</p>
 
 ---
 
@@ -92,6 +98,16 @@ From the repository root:
 jac install     # first time only: fetches npm + python dependencies
 jac run         # starts the web app and the planner service
 ```
+
+> **If `jac install` fails with `ImportError: ... _posixsubprocess ... symbol
+> not found`** — a known bug in the Python bundled with some Jac builds on
+> macOS arm64, not in this project — create the virtualenv yourself with any
+> Python 3 on your machine and re-run. The project has no Python
+> dependencies, so an empty environment is enough:
+>
+> ```bash
+> python3 -m venv .jac/venv && jac install
+> ```
 
 Open <http://localhost:8000>, click **Create one**, pick any username and
 password, and you are in. On the **Settings** page, press **Seed** to fill the
@@ -197,8 +213,9 @@ CSS), so the same source compiles to a real native app and to a browser
 preview.
 
 ```bash
-# Browser preview (easiest to grade, no simulator needed).
-# Stop `jac run` first, or pass --port 8010 to run both at once.
+# Browser preview -- easiest to grade, no simulator needed.
+# Stop `jac run` first: both share the client build directory, so they
+# cannot be up at the same time. `jac run` afterwards rebuilds the web app.
 jac run --dev --platform web mobile
 
 # Real device / simulator (needs Expo + Xcode or Android SDK):
@@ -206,6 +223,9 @@ jac setup mobile
 jac run --dev mobile
 jac build mobile --platform ios      # or: --platform android
 ```
+
+The preview prints the URL it chose (`App: http://localhost:8003/` or
+similar). Sign in there with the same account you use on the web.
 
 Three tabs — **Today** (briefing, what is due, the day's blocks), **Capture**
 (one-line entry with the server's readback), and **Habits** (tap to keep a
@@ -464,12 +484,13 @@ arbor-planner/
 ## Troubleshooting
 
 **`jac install` fails with `ImportError: ... _posixsubprocess ... symbol not found`.**
-A known issue with the bundled Python in some Jac builds on macOS arm64 — the
+A known issue with the Python bundled in some Jac builds on macOS arm64: the
 standalone interpreter cannot create a virtualenv. Create it yourself with any
-CPython 3.14 and re-run:
+Python 3 and re-run — this project has no Python dependencies, so the
+environment only has to exist:
 
 ```bash
-python3.14 -m venv .jac/venv   # e.g. uv python install 3.14 && uv python find 3.14
+python3 -m venv .jac/venv
 jac install
 ```
 

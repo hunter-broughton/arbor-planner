@@ -223,7 +223,15 @@ glob DEFAULT_MINUTES: dict[str, int] = {
 glob KIND_CUES: list[tuple[str, list[str]]] = [
     (
         "exam",
-        ["midterm", "final exam", "final", "exam", "quiz", "study for", "studying for"]
+        [
+            "midterm",
+            "final exam",
+            "finals",
+            "exam",
+            "quiz",
+            "study for",
+            "studying for"
+        ]
     ),
     (
         "assignment",

@@ -113,3 +113,14 @@ def:pub day_of_month(date: str) -> str {
     }
     return parts[2].lstrip("0") or parts[2];
 }
+
+
+"""True when a failed server call was rejected for want of a valid session.
+
+The route guard only knows whether a token is stored locally; it cannot tell
+that the server has stopped accepting it. Pages use this to send the user
+back to the sign-in screen instead of rendering an empty day.
+"""
+def:pub is_auth_error(error: any) -> bool {
+    return "UNAUTHORIZED" in str(error).upper();
+}

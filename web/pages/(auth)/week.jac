@@ -5,8 +5,10 @@ Paging is a server concern: the client tracks a week offset and the
 know how long a month is.
 """
 
+import from "@jac/runtime" { jacLogout, useNavigate }
+
 import from core.planner { WeekView, outlook, toggle_task }
-import from web.fmt { day_of_month, duration, due_label, plural }
+import from web.fmt { day_of_month, duration, due_label, is_auth_error, plural }
 
 
 def:pub page -> JsxPage {
@@ -14,6 +16,15 @@ def:pub page -> JsxPage {
         offset: int = 0,
         loading: bool = True,
         error: str = "";
+
+    navigate = useNavigate();
+
+    # A stored token the server no longer accepts: drop it and start over,
+    # rather than rendering an empty planner.
+    def signOut {
+        jacLogout();
+        navigate("/login", {"replace": True});
+    }
 
     async can with entry {
         await load(0);
@@ -24,8 +35,12 @@ def:pub page -> JsxPage {
         loading = True;
         try {
             fresh = await outlook("", 7, target);
-        } except Exception {
+        } except Exception as e {
             loading = False;
+            if is_auth_error(e) {
+                signOut();
+                return;
+            }
             error = "Could not reach the planner service.";
             return;
         }

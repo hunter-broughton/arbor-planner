@@ -5,6 +5,8 @@ Owns the agenda and the day plan, and drives every mutation through the
 the walker on the server assembles it in a single pass over the graph.
 """
 
+import from "@jac/runtime" { jacLogout, useNavigate }
+
 import from core.planner {
     AgendaView,
     PlanResult,
@@ -24,7 +26,7 @@ import from web.components.DayPlanCard { DayPlanCard }
 import from web.components.HabitRow { HabitRow }
 import from web.components.QuickAdd { QuickAdd }
 import from web.components.TaskList { TaskList }
-import from web.fmt { duration, plural }
+import from web.fmt { duration, is_auth_error, plural }
 
 
 def:pub page -> JsxPage {
@@ -34,6 +36,15 @@ def:pub page -> JsxPage {
         planning: bool = False,
         splitting: str = "",
         error: str = "";
+
+    navigate = useNavigate();
+
+    # A stored token the server no longer accepts: drop it and start over,
+    # rather than rendering an empty planner.
+    def signOut {
+        jacLogout();
+        navigate("/login", {"replace": True});
+    }
 
     async can with entry {
         await refresh();
@@ -45,8 +56,12 @@ def:pub page -> JsxPage {
         try {
             nextAgenda = await agenda("");
             nextPlan = await get_day_plan("");
-        } except Exception {
+        } except Exception as e {
             loading = False;
+            if is_auth_error(e) {
+                signOut();
+                return;
+            }
             error = "Could not reach the planner service.";
             return;
         }

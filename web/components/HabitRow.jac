@@ -3,6 +3,12 @@
 import from core.contracts { GoalView }
 
 
+"""The unit a streak is counted in: "day" or "week"."""
+def period_noun(cadence: str) -> str {
+    return "week" if cadence == "weekly" else "day";
+}
+
+
 def:pub HabitRow(
     goal: GoalView,
     days: list[str],
@@ -23,10 +29,10 @@ def:pub HabitRow(
                 <div className="habit-title">{goal.title}</div>
                 <div className="task-meta">
                     <span className={"pill pill-ok" if goal.streak > 0 else "pill"}>
-                        {str(goal.streak) + " " + goal.cadence[:-2] + " streak"}
+                        {str(goal.streak) + " " + period_noun(goal.cadence) + " streak"}
                     </span>
                     <span className="faint">
-                        {str(goal.period_count) + " / " + str(goal.target_per_period) + " this " + ("week" if goal.cadence == "weekly" else "day")}
+                        {str(goal.period_count) + " / " + str(goal.target_per_period) + " this " + period_noun(goal.cadence)}
                     </span>
                 </div>
                 <div className="streak">

@@ -5,6 +5,8 @@ configured, since every AI feature has a deterministic twin and the app
 behaves identically either way apart from the quality of the prose.
 """
 
+import from "@jac/runtime" { jacLogout, useNavigate }
+
 import from core.planner {
     OpResult,
     ProfileView,
@@ -15,7 +17,7 @@ import from core.planner {
     service_status,
     update_profile
 }
-import from web.fmt { clock, duration }
+import from web.fmt { clock, duration, is_auth_error }
 
 
 def:pub page -> JsxPage {
@@ -30,6 +32,15 @@ def:pub page -> JsxPage {
         loading: bool = True,
         saving: bool = False;
 
+    navigate = useNavigate();
+
+    # A stored token the server no longer accepts: drop it and start over,
+    # rather than rendering an empty planner.
+    def signOut {
+        jacLogout();
+        navigate("/login", {"replace": True});
+    }
+
     async can with entry {
         await load();
     }
@@ -40,8 +51,12 @@ def:pub page -> JsxPage {
         try {
             freshProfile = await me();
             freshStatus = await service_status();
-        } except Exception {
+        } except Exception as e {
             loading = False;
+            if is_auth_error(e) {
+                signOut();
+                return;
+            }
             error = "Could not reach the planner service.";
             return;
         }

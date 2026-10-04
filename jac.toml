@@ -1,0 +1,72 @@
+[project]
+name = "arbor"
+version = "1.0.0"
+description = "Arbor -- a personal academic planner built in Jac: one server, one graph, four front ends."
+default-app = "web"
+jac-version = ">=0.37.23"
+
+# Four apps over one shared core. `planner` is the only one with a store;
+# the other three are clients of it, so `jac run` (which serves the default
+# app and colocates every service app in the same process) brings up the
+# whole system.
+
+[apps.planner]
+kind = "service"
+entry-point = "core.planner"
+
+[apps.planner.check.lint]
+# Endpoint parameter lists are the request schema -- flat by design.
+ignore = ["too-many-params"]
+
+[apps.web]
+kind = "web-app"
+entry-point = "web.main"
+
+[apps.mobile]
+kind = "mobile"
+entry-point = "mobile.main"
+
+[apps.cli]
+kind = "cli"
+entry-point = "cli.main"
+
+[apps.cli.check.lint]
+ignore = ["no-print", "too-many-params"]
+
+[byllm.model]
+# Overridable with BYLLM_DEFAULT_MODEL. Every AI feature degrades to a
+# deterministic implementation when no provider key is present, so the app
+# runs fully without this.
+default_model = "anthropic/claude-sonnet-5"
+
+[serve]
+port = 8000
+
+[test]
+directories = ["core", "cli"]
+
+[dependencies.npm]
+react = "^19.2.0"
+react-dom = "^19.2.0"
+react-native-web = "^0.19.13"
+lucide-react = "^0.469.0"
+react-router-dom = "^6.22.0"
+react-error-boundary = "^5.0.0"
+"@tanstack/react-form" = "^1.33.0"
+zod = "^4.3.6"
+
+[dependencies.npm.dev]
+vite = "^6.4.1"
+"@vitejs/plugin-react" = "^4.7.0"
+typescript = "^5.3.3"
+"@types/react" = "^19.2.0"
+"@types/react-dom" = "^19.2.0"
+
+[apps.mobile.dependencies.npm.native]
+lucide-react-native = "^0.469.0"
+react-native-svg = "^15.13.0"
+
+[client.app_meta_data]
+title = "Arbor -- Personal Academic Planner"
+description = "Plan coursework, schedule focus blocks, and keep habits -- one Jac graph behind a web app, a phone app, and a CLI."
+theme_color = "#0f766e"

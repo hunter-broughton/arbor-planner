@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Arbor CLI wrapper -- "./arbor today" instead of "jac run cli -- today".
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")"
+exec jac run cli -- "$@"

@@ -1,0 +1,12 @@
+# Jac build output, virtualenv, and local graph data
+.jac/
+dist/
+node_modules/
+
+# Local CLI session (holds an auth token)
+.arbor/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store

@@ -246,6 +246,7 @@ preview.
 # Browser preview -- easiest to grade, no simulator needed.
 # Stop `jac run` first: both share the client build directory, so they
 # cannot be up at the same time. `jac run` afterwards rebuilds the web app.
+jac build mobile --platform web      # once, to emit the mobile client bundle
 jac run --dev --platform web mobile
 
 # Real device / simulator (needs Expo + Xcode or Android SDK):
@@ -536,6 +537,16 @@ build caches compiled artifacts. Stop the server and clear them:
 
 ```bash
 rm -rf .jac/cache .jac/client && jac run
+```
+
+**The mobile preview says `Failed to resolve import "/mobile/compiled/_entry.js"`.**
+The web app and the mobile preview share `.jac/client`, and the preview will
+not emit its entry while a web build is sitting there. Build the mobile
+bundle once, which writes it, then start the preview:
+
+```bash
+jac build mobile --platform web
+jac run --dev --platform web mobile
 ```
 
 **`hunt: cannot reach the planner service`.** `jac run` is not up, or the CLI

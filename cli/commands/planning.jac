@@ -50,6 +50,7 @@ def show_plan(blocks: list[any], summary: str) {
                 + paint(clock(block.start_min) + "–" + clock(block.end_min), DIM)
                 + "  "
                 + fit(label, 44)
+                + "  "
                 + paint(block.rationale, DIM)
         );
     }
@@ -119,6 +120,7 @@ async def run_week(offset: int) -> int {
                     + "  "
                     + paint(fit(task.course_code or "—", 10), CYAN)
                     + fit(task.title, 42)
+                    + "  "
                     + paint(duration(task.estimate_minutes), DIM)
             );
         }

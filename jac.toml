@@ -67,6 +67,6 @@ lucide-react-native = "^0.469.0"
 react-native-svg = "^15.13.0"
 
 [client.app_meta_data]
-title = "HunterPlan -- Personal Academic Planner"
+title = "HunterPlan — Personal Academic Planner"
 description = "Plan coursework, schedule focus blocks, and keep habits -- one Jac graph behind a web app, a phone app, and a CLI."
-theme_color = "#0f766e"
+theme_color = "#ffcb05"

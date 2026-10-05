@@ -35,6 +35,7 @@ def:pub page -> JsxPage {
         loading: bool = True,
         planning: bool = False,
         splitting: str = "",
+        pending: list[str] = [],
         error: str = "";
 
     navigate = useNavigate();
@@ -48,6 +49,12 @@ def:pub page -> JsxPage {
 
     async can with entry {
         await refresh();
+    }
+
+    can with entry {
+        onPlanKey = lambda { buildPlan(); };
+        document.addEventListener("hunterplan:plan", onPlanKey);
+        return lambda { document.removeEventListener("hunterplan:plan", onPlanKey); };
     }
 
     async def refresh {
@@ -71,9 +78,17 @@ def:pub page -> JsxPage {
         loading = False;
     }
 
+    # Optimistic: the box fills the instant it is clicked, and the refresh
+    # that follows either confirms it or puts it back.
     async def toggle(taskId: str) {
-        await toggle_task(taskId);
-        await refresh();
+        pending = pending + [taskId];
+        try {
+            await toggle_task(taskId);
+            await refresh();
+        } except Exception {
+            error = "Could not update that task.";
+        }
+        pending = [id for id in pending if id != taskId];
     }
 
     async def remove(taskId: str) {
@@ -163,6 +178,7 @@ def:pub page -> JsxPage {
                             onToggle={toggle}
                             onDelete={remove}
                             onBreakdown={split}
+                            pending={pending}
                             tone="pill pill-danger"
                         />
                     ) if len(today.overdue) > 0 else None}
@@ -173,6 +189,7 @@ def:pub page -> JsxPage {
                         onToggle={toggle}
                         onDelete={remove}
                         onBreakdown={split}
+                        pending={pending}
                         tone="pill pill-warn"
                     />
                     <TaskList
@@ -182,6 +199,7 @@ def:pub page -> JsxPage {
                         onToggle={toggle}
                         onDelete={remove}
                         onBreakdown={split}
+                        pending={pending}
                     />
                     {(
                         <TaskList
@@ -191,6 +209,7 @@ def:pub page -> JsxPage {
                             onToggle={toggle}
                             onDelete={remove}
                             onBreakdown={split}
+                            pending={pending}
                             tone="pill pill-ok"
                         />
                     ) if len(today.completed_today) > 0 else None}

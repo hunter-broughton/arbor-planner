@@ -104,9 +104,9 @@ test "login carries its server override and registration flag" {
     assert text_of(plain, "server") == "";
     assert not flag_of(plain, "register");
     hosted = parser.parse_args(
-        ["login", "hunter", "--server", "https://arbor.example", "--register"]
+        ["login", "hunter", "--server", "https://hunt.example", "--register"]
     );
-    assert text_of(hosted, "server") == "https://arbor.example";
+    assert text_of(hosted, "server") == "https://hunt.example";
     assert flag_of(hosted, "register");
 }
 

@@ -35,10 +35,11 @@ def:pub QuickAdd(onAdded: Callable[[], None]) -> JsxElement {
     }
 
     return
-        <section className="card">
+        <section className="card rise rise-1">
             <div className="card-body">
                 <div className="quickadd">
                     <input
+                        id="quickcapture"
                         className="input grow"
                         value={text}
                         placeholder="EECS 449 project proposal due friday 5pm ~3h urgent"
@@ -52,7 +53,7 @@ def:pub QuickAdd(onAdded: Callable[[], None]) -> JsxElement {
                         onClick={lambda { submit(); }}
                         disabled={busy}
                     >
-                        {("Reading..." if busy else "Capture")}
+                        {("Reading…" if busy else "Capture")}
                     </button>
                 </div>
                 {(<div className="banner banner-error" style={{"marginTop": "8px"}}>{error}</div>) if error else None}

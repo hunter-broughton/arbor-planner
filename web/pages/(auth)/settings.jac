@@ -148,7 +148,7 @@ def:pub page -> JsxPage {
                 <div>
                     <h1 className="page-title">Settings</h1>
                     <p className="page-sub">
-                        How Arbor plans your day, and what it knows about you.
+                        How HunterPlan plans your day, and what it knows about you.
                     </p>
                 </div>
             </div>

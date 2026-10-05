@@ -1,4 +1,4 @@
-"""Wire contracts shared by every Arbor app.
+"""Wire contracts shared by every HunterPlan app.
 
 This module is pure data: enums and `obj` views, no nodes, no edges, no
 Python imports. That matters because an app may not import another app's
@@ -17,7 +17,7 @@ obj CourseView {
         code: str = "",
         title: str = "",
         credits: int = 0,
-        color: str = "#0f766e",
+        color: str = "#ffcb05",
         term: str = "",
         open_tasks: int = 0,
         open_minutes: int = 0,
@@ -47,7 +47,7 @@ obj TaskView {
         created_at: str = "",
         course_id: str = "",
         course_code: str = "",
-        course_color: str = "#64748b",
+        course_color: str = "#7d9bbd",
         parent_id: str = "",
         origin: str = "manual",
         days_until: int = NO_DUE_DATE,
@@ -74,7 +74,7 @@ obj GoalView {
         title: str = "",
         cadence: str = "daily",
         target_per_period: int = 1,
-        color: str = "#7c3aed",
+        color: str = "#00ff94",
         streak: int = 0,
         period_count: int = 0,
         done_this_period: bool = False,
@@ -161,10 +161,10 @@ obj OpResult {
 }
 
 obj StatusView {
-    """Service health and capability probe -- the CLI's `arbor status`."""
+    """Service health and capability probe -- the CLI's `hunt status`."""
 
     has ok: bool = True,
-        service: str = "arbor-planner",
+        service: str = "hunterplan",
         server_date: str = "",
         ai_enabled: bool = False,
         ai_model: str = "",

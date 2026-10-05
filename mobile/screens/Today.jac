@@ -145,7 +145,7 @@ def:pub Today -> JsxElement {
                 {(
                     <View style={styles["empty"]}>
                         <Text style={styles["emptyText"]}>
-                            No schedule yet. Build one and Arbor lays your open
+                            No schedule yet. Build one and HunterPlan lays your open
                             work into focus blocks.
                         </Text>
                     </View>

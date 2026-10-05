@@ -4,7 +4,7 @@ dist/
 node_modules/
 
 # Local CLI session (holds an auth token)
-.arbor/
+.hunterplan/
 
 # Editors and OS
 .vscode/

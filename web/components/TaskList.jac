@@ -12,11 +12,12 @@ def:pub TaskList(
     onToggle: Callable[[str], None],
     onDelete: Callable[[str], None],
     onBreakdown: Callable[[str], None],
+    pending: list[str] = [],
     tone: str = ""
 ) -> JsxElement {
     minutes = sum([t.estimate_minutes for t in tasks if not t.done]);
     return
-        <section className="card">
+        <section className="card rise rise-2">
             <div className="card-head">
                 <h2 className="card-title">{title}</h2>
                 <div className="row">
@@ -38,6 +39,7 @@ def:pub TaskList(
                                 onToggle={lambda { onToggle(task.id); }}
                                 onDelete={lambda { onDelete(task.id); }}
                                 onBreakdown={lambda { onBreakdown(task.id); }}
+                                pending={task.id in pending}
                             /> for task in tasks
                         ]}
                     </div>

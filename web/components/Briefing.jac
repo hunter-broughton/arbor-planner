@@ -10,7 +10,7 @@ def:pub Briefing(agenda: AgendaView) -> JsxElement {
     over = agenda.load_minutes > capacity;
     width = str(int(min(1.0, ratio) * 100.0)) + "%";
     return
-        <section className="card">
+        <section className="card rise">
             <div className="briefing">
                 <div className="briefing-body">
                     <h2 className="briefing-headline">

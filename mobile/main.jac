@@ -1,4 +1,4 @@
-"""Arbor for phones -- a mobUI client of the same planner service.
+"""HunterPlan for phones -- a mobUI client of the same planner service.
 
 No store of its own and no duplicated rules: every screen bridges to the
 `planner` service app, so a task completed here is completed in the browser
@@ -42,7 +42,7 @@ def:pub app -> JsxElement {
     if checking {
         return
             <View style={styles["empty"]}>
-                <Text style={styles["emptyText"]}>Starting Arbor...</Text>
+                <Text style={styles["emptyText"]}>Starting HunterPlan...</Text>
             </View>;
     }
 
@@ -55,12 +55,12 @@ def:pub app -> JsxElement {
             <View style={styles["header"]}>
                 <View style={styles["headerRow"]}>
                     <View style={styles["row"]}>
-                        <View style={[styles["glyph"], {"width": 30, "height": 30}]}>
-                            <Text style={[styles["glyphText"], {"fontSize": 15}]}>A</Text>
-                        </View>
-                        <View>
-                            <Text style={[styles["title"], {"fontSize": 20}]}>Arbor</Text>
-                            <Text style={styles["subtitle"]}>your planner, everywhere</Text>
+                        <View style={styles["brandRow"]}>
+                            <Text style={styles["brandBracket"]}>&lt;</Text>
+                            <Text style={styles["brandOne"]}>Hunter</Text>
+                            <Text style={styles["brandSlash"]}>/</Text>
+                            <Text style={styles["brandTwo"]}>Plan</Text>
+                            <Text style={styles["brandBracket"]}>&gt;</Text>
                         </View>
                     </View>
                     <Pressable style={styles["buttonGhost"]} onPress={signOut}>

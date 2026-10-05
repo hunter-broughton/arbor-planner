@@ -1,4 +1,4 @@
-"""The Arbor planner service -- the single source of truth for all four apps.
+"""The HunterPlan planner service -- the single source of truth for all four apps.
 
 This module is the entry point of the `planner` service app declared in
 `jac.toml`. The web frontend, the mobile app and the CLI are all clients of
@@ -71,15 +71,17 @@ import from core.timeutil {
     weekday_name
 }
 
+# Michigan maize and neon blue first, then colours that hold up against a
+# dark blue ground -- the same family the clients paint their chrome in.
 glob COURSE_PALETTE: list[str] = [
-    "#0f766e",
-    "#b45309",
-    "#4338ca",
-    "#be123c",
-    "#15803d",
-    "#0369a1",
-    "#7c2d12",
-    "#6d28d9"
+    "#ffcb05",
+    "#3399ff",
+    "#00ff94",
+    "#ff6b9d",
+    "#b794f6",
+    "#ff9f43",
+    "#4fd1c5",
+    "#f6e05e"
 ];
 
 glob DEFAULT_CAPACITY: int = 240,
@@ -154,7 +156,7 @@ node Goal {
     has title: str = "",
         cadence: str = "daily",
         target_per_period: int = 1,
-        color: str = "#7c3aed",
+        color: str = "#00ff94",
         created_at: str = "";
 }
 

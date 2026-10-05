@@ -1,7 +1,7 @@
 [project]
-name = "arbor"
+name = "hunterplan"
 version = "1.0.0"
-description = "Arbor -- a personal academic planner built in Jac: one server, one graph, four front ends."
+description = "HunterPlan -- a personal academic planner built in Jac: one server, one graph, four front ends."
 default-app = "web"
 jac-version = ">=0.37.23"
 
@@ -67,6 +67,6 @@ lucide-react-native = "^0.469.0"
 react-native-svg = "^15.13.0"
 
 [client.app_meta_data]
-title = "Arbor -- Personal Academic Planner"
+title = "HunterPlan -- Personal Academic Planner"
 description = "Plan coursework, schedule focus blocks, and keep habits -- one Jac graph behind a web app, a phone app, and a CLI."
 theme_color = "#0f766e"

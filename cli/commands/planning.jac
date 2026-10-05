@@ -40,7 +40,7 @@ import from cli.commands.common {
 """Render a stored or freshly built plan."""
 def show_plan(blocks: list[any], summary: str) {
     if not blocks {
-        print(paint("  no blocks -- run `arbor plan` to build one", DIM));
+        print(paint("  no blocks -- run `hunt plan` to build one", DIM));
         return;
     }
     for block in blocks {
@@ -58,7 +58,7 @@ def show_plan(blocks: list[any], summary: str) {
 }
 
 
-"""`arbor plan [--minutes N]` -- build today's schedule."""
+"""`hunt plan [--minutes N]` -- build today's schedule."""
 async def run_plan(minutes: int, show_only: bool) -> int {
     try {
         result = await get_day_plan("") if show_only else await plan_day("", minutes);
@@ -78,7 +78,7 @@ async def run_plan(minutes: int, show_only: bool) -> int {
 }
 
 
-"""`arbor plan clear`."""
+"""`hunt plan clear`."""
 async def run_clear_plan -> int {
     try {
         outcome = await clear_day_plan("");
@@ -90,7 +90,7 @@ async def run_clear_plan -> int {
 }
 
 
-"""`arbor week [--offset N]` -- seven days of deadlines."""
+"""`hunt week [--offset N]` -- seven days of deadlines."""
 async def run_week(offset: int) -> int {
     try {
         week = await outlook("", 7, offset);
@@ -136,7 +136,7 @@ async def run_week(offset: int) -> int {
 }
 
 
-"""`arbor courses` -- the term, with workload rolled up per class."""
+"""`hunt courses` -- the term, with workload rolled up per class."""
 async def run_courses -> int {
     try {
         courses = await list_courses();
@@ -144,7 +144,7 @@ async def run_courses -> int {
         return exit_code_for(e);
     }
     if not courses {
-        print(paint("no courses yet -- `arbor course add \"EECS 449\" --title \"...\"`", DIM));
+        print(paint("no courses yet -- `hunt course add \"EECS 449\" --title \"...\"`", DIM));
         return EXIT_OK;
     }
     print();
@@ -166,10 +166,10 @@ async def run_courses -> int {
 }
 
 
-"""`arbor course add <code> [--title T] [--credits N]`."""
+"""`hunt course add <code> [--title T] [--credits N]`."""
 async def run_add_course(code: str, title: str, credits: int) -> int {
     if not code.strip() {
-        warn("arbor course add: a course code is required");
+        warn("hunt course add: a course code is required");
         return EXIT_USAGE;
     }
     try {
@@ -182,7 +182,7 @@ async def run_add_course(code: str, title: str, credits: int) -> int {
 }
 
 
-"""`arbor course rm <code>`."""
+"""`hunt course rm <code>`."""
 async def run_remove_course(code: str) -> int {
     try {
         outcome = await remove_course(code.strip());
@@ -190,7 +190,7 @@ async def run_remove_course(code: str) -> int {
         return exit_code_for(e);
     }
     if not outcome.ok {
-        warn("arbor: " + outcome.message);
+        warn("hunt: " + outcome.message);
         return EXIT_FAILURE;
     }
     print(paint("✔", GREEN) + " " + outcome.message);
@@ -198,7 +198,7 @@ async def run_remove_course(code: str) -> int {
 }
 
 
-"""`arbor habits` -- streaks at a glance."""
+"""`hunt habits` -- streaks at a glance."""
 async def run_habits -> int {
     try {
         goals = await list_goals();
@@ -206,7 +206,7 @@ async def run_habits -> int {
         return exit_code_for(e);
     }
     if not goals {
-        print(paint("no habits yet -- `arbor habit add \"Move for 30 minutes\"`", DIM));
+        print(paint("no habits yet -- `hunt habit add \"Move for 30 minutes\"`", DIM));
         return EXIT_OK;
     }
     print();
@@ -230,10 +230,10 @@ async def run_habits -> int {
 }
 
 
-"""`arbor habit add <title> [--weekly] [--target N]`."""
+"""`hunt habit add <title> [--weekly] [--target N]`."""
 async def run_add_habit(title: str, weekly: bool, target: int) -> int {
     if not title.strip() {
-        warn("arbor habit add: a title is required");
+        warn("hunt habit add: a title is required");
         return EXIT_USAGE;
     }
     try {
@@ -246,7 +246,7 @@ async def run_add_habit(title: str, weekly: bool, target: int) -> int {
 }
 
 
-"""`arbor check <habit>` / `arbor uncheck <habit>`."""
+"""`hunt check <habit>` / `hunt uncheck <habit>`."""
 async def run_check_habit(needle: str, undo: bool) -> int {
     wanted = needle.strip().lower();
     try {
@@ -258,7 +258,7 @@ async def run_check_habit(needle: str, undo: bool) -> int {
         g for g in goals if g.id.lower().startswith(wanted) or wanted in g.title.lower()
     ];
     if len(matches) != 1 {
-        warn("arbor: \"" + needle + "\" matched " + str(len(matches)) + " habits");
+        warn("hunt: \"" + needle + "\" matched " + str(len(matches)) + " habits");
         for goal in goals {
             warn("    " + short_id(goal.id) + "  " + goal.title);
         }
@@ -272,7 +272,7 @@ async def run_check_habit(needle: str, undo: bool) -> int {
         return exit_code_for(e);
     }
     if updated is None {
-        warn("arbor: that habit no longer exists");
+        warn("hunt: that habit no longer exists");
         return EXIT_FAILURE;
     }
     verb = "unchecked" if undo else "checked"; 
@@ -288,7 +288,7 @@ async def run_check_habit(needle: str, undo: bool) -> int {
 }
 
 
-"""`arbor seed` / `arbor reset` -- demo data controls."""
+"""`hunt seed` / `hunt reset` -- demo data controls."""
 async def run_data(wipe: bool) -> int {
     try {
         outcome = await reset_all() if wipe else await seed_demo();
@@ -296,7 +296,7 @@ async def run_data(wipe: bool) -> int {
         return exit_code_for(e);
     }
     if not outcome.ok {
-        warn("arbor: " + outcome.message);
+        warn("hunt: " + outcome.message);
         return EXIT_FAILURE;
     }
     print(paint("✔", GREEN) + " " + outcome.message);

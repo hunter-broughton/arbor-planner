@@ -79,12 +79,12 @@ test "a title is always produced, even from junk" {
 
 test "interpret falls back cleanly when no model is configured" {
     import os;
-    os.environ["ARBOR_DISABLE_AI"] = "1";
+    os.environ["HUNTERPLAN_NO_AI"] = "1";
     assert not ai_available();
     reading = interpret("pset 4 eecs445 due friday ~2h", TODAY, "Sunday", COURSES);
     assert not reading.ai;
     assert reading.parsed.course_code == "EECS 445";
-    os.environ.pop("ARBOR_DISABLE_AI", None);
+    os.environ.pop("HUNTERPLAN_NO_AI", None);
 }
 
 test "a model's parse is rejected when it will not stand up" {

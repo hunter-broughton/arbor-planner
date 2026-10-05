@@ -1,4 +1,4 @@
-# Arbor — a personal academic planner in Jac
+# HunterPlan — a personal academic planner in Jac
 
 **EECS 449 · Extra Credit 1 · Fall 2026**
 
@@ -6,11 +6,16 @@
 - **UMID:** `<<FILL IN BEFORE SUBMITTING>>`
 - **uniqname:** huntbro
 
-Arbor is the planner I actually want for a semester of EECS: it holds my
+HunterPlan is the planner I actually want for a semester of EECS: it holds my
 courses, reads a deadline out of a sentence I typed in a hurry, ranks
 everything by how much trouble it will cause me, and carves the day into
 focus blocks. One server, one graph, and three front ends over it — a web
 app, a phone app, and a CLI.
+
+It wears the same clothes as [hunterbroughton.com](https://hunterbroughton.com):
+Michigan maize against neon blue, a monospace terminal strip across the top, a
+bracketed `<Hunter/Plan>` wordmark, and the restraint to keep the glow on the
+things that matter.
 
 ![The Today screen](docs/web-today.png)
 
@@ -34,7 +39,7 @@ app, a phone app, and a CLI.
 ## What it does
 
 **Capture in one line.** Type `EECS 449 project proposal due friday 5pm ~3h urgent`
-into any of the three front ends and Arbor files it against the right course,
+into any of the three front ends and HunterPlan files it against the right course,
 resolves `friday` to a real date, reads `5pm` as a time, `~3h` as a working
 estimate and `urgent` as a priority — then shows you its reading so a wrong
 guess is caught immediately instead of silently.
@@ -74,6 +79,19 @@ two students on one deployment never see each other's work.
 </p>
 <p align="center">
   <img src="docs/web-habits.png" width="49%" alt="Habits and streaks">
+</p>
+
+**Built for the keyboard.** `1`–`5` jump between screens, `/` drops the cursor
+in the quick-capture box, `p` builds today's plan, `r` reloads, and `?` lists
+the lot. Nothing is intercepted while you are typing in a field.
+
+**It tells you where you are.** The day plan draws a live `NOW` marker that
+slides down as the afternoon goes, and dims the blocks already behind it, so
+one glance says whether you are on plan.
+
+<p align="center">
+  <img src="docs/web-keys.png" width="49%" alt="Keyboard shortcut overlay">
+  <img src="docs/web-login.png" width="49%" alt="Sign-in screen">
 </p>
 
 ---
@@ -132,36 +150,48 @@ Also worth a look while it is running:
 The main interface. Five routes behind a file-based router: **Today**,
 **Week**, **Courses**, **Habits**, **Settings**. `pages/(auth)/` is an
 auth-guarded route group, so an unauthenticated visitor is redirected to
-`/login` automatically.
+`/login` automatically — and a stored token the server has stopped accepting
+sends you back there too, rather than rendering an empty planner.
 
-### CLI — `./arbor <command>`
+| Key | Does |
+|---|---|
+| `1` … `5` | Jump to Today, Week, Courses, Habits, Settings |
+| `/` | Focus the quick-capture box |
+| `p` | Build today's plan |
+| `r` | Reload from the server |
+| `?` | Show the shortcut list |
+
+Toggling a task is optimistic: the box fills the moment you click it, and the
+refresh behind it either confirms the change or quietly puts it back.
+
+### CLI — `./hunt <command>`
 
 The fastest way in and out of the planner, and the surface I use most.
 
 ```bash
-./arbor login <username> --register   # first time; drop --register after that
-./arbor seed                          # optional sample data
-./arbor today
-./arbor add "EECS 485 project 4 map reduce due next friday 11:59pm ~6h urgent"
-./arbor plan --minutes 300
-./arbor done pagination
+./hunt login <username> --register   # first time; drop --register after that
+./hunt seed                          # optional sample data
+./hunt today
+./hunt add "EECS 485 project 4 map reduce due next friday 11:59pm ~6h urgent"
+./hunt plan --minutes 300
+./hunt done pagination
 ```
 
-`./arbor` is a one-line wrapper over `jac run cli -- "$@"`; the long form works
+`./hunt` is a one-line wrapper over `jac run cli -- "$@"`; the long form works
 identically if you prefer it:
 
 ```bash
 jac run cli -- today
 ```
 
-The session (server URL + token) is stored in `~/.arbor/session.json` with
-owner-only permissions. `ARBOR_SERVER`, `ARBOR_TOKEN` and `ARBOR_HOME`
+The session (server URL + token) is stored in `~/.hunterplan/session.json` with
+owner-only permissions. `HUNTERPLAN_SERVER`, `HUNTERPLAN_TOKEN` and `HUNTERPLAN_HOME`
 override it for scripting.
 
 Real output:
 
 ```
-$ ./arbor today
+$ ./hunt today
 
 Sunday, 2026-10-04   1h of work · capacity 4h
 
@@ -195,15 +225,15 @@ HABITS  0 of 3 kept
 ```
 
 ```
-$ ./arbor add "EECS 449 project proposal due friday 5pm ~3h urgent"
+$ ./hunt add "EECS 449 project proposal due friday 5pm ~3h urgent"
 ✔ added Project proposal  [parsed]
   EECS 449 · project · due Fri Oct 9 17:00 · 3h · critical priority
   id 5733cd
 ```
 
 Tasks are addressed by **id prefix or by a piece of their title**, so you never
-have to type a 32-character id: `./arbor done pagination` and
-`./arbor split "project proposal"` both work. An ambiguous handle lists the
+have to type a 32-character id: `./hunt done pagination` and
+`./hunt split "project proposal"` both work. An ambiguous handle lists the
 candidates instead of guessing.
 
 ### Mobile app — `jac run --dev --platform web mobile`
@@ -398,7 +428,7 @@ jac run
 ```
 
 `BYLLM_DEFAULT_MODEL` overrides the model for one shell (any LiteLLM provider,
-including `local:gemma-4-e4b` and `ollama/...`), and `ARBOR_DISABLE_AI=1`
+including `local:gemma-4-e4b` and `ollama/...`), and `HUNTERPLAN_NO_AI=1`
 forces the deterministic path. An invalid key degrades to the fallback rather
 than failing the request — I tested that explicitly.
 
@@ -442,18 +472,25 @@ between runs.
 - **Four front ends in one language.** Server graph code, a React web app, a
   React Native app and an argparse CLI, all in Jac, all type-checked together
   by `jac check`.
+- **One visual identity across three front ends.** The maize-and-blue, the
+  bracketed wordmark, the monospace meta text and the terminal framing carry
+  from the browser to the phone to the terminal — the CLI paints the same
+  `<Hunter/Plan>` mark in ANSI and colours priorities with the same
+  vocabulary. Lifted from my own site so the planner looks like it belongs to
+  me rather than to a template.
 - **It is finished rather than broad.** Auth, per-user isolation, empty states,
-  error banners on every network call, meaningful CLI exit codes, colour that
-  disables itself when piped, seed and reset controls, and a clean console.
+  error banners on every network call, keyboard control, optimistic toggles,
+  meaningful CLI exit codes, colour that disables itself when piped, seed and
+  reset controls, and a clean console.
 
 ---
 
 ## Project layout
 
 ```
-arbor-planner/
+hunterplan/
 ├── jac.toml                  four apps over one core
-├── arbor                     CLI wrapper -> jac run cli --
+├── hunt                     CLI wrapper -> jac run cli --
 ├── core/                     shared, server-owned
 │   ├── planner.jac           SERVICE ENTRY: nodes, edges, walkers, endpoints
 │   ├── contracts.jac         the obj/enum views every app agrees on
@@ -501,12 +538,12 @@ build caches compiled artifacts. Stop the server and clear them:
 rm -rf .jac/cache .jac/client && jac run
 ```
 
-**`arbor: cannot reach the planner service`.** `jac run` is not up, or the CLI
-is pointed elsewhere — check `./arbor status`, and re-point with
-`./arbor login <user> --server http://localhost:8000`.
+**`hunt: cannot reach the planner service`.** `jac run` is not up, or the CLI
+is pointed elsewhere — check `./hunt status`, and re-point with
+`./hunt login <user> --server http://localhost:8000`.
 
 **Port 8000 is busy.** `jac run --port 8010`, then
-`./arbor login <user> --server http://localhost:8010`.
+`./hunt login <user> --server http://localhost:8010`.
 
 **Server-side changes do not take effect.** `.jac` client files hot-reload;
 changes under `core/` need a server restart.

@@ -60,16 +60,19 @@ def:pub page -> JsxPage {
 
     return
         <div className="auth-wrap">
-            <div className="card auth-card">
+            <div className="card auth-card rise">
                 <div className="wordmark" style={{"padding": "0"}}>
-                    <div className="wordmark-glyph">A</div>
-                    <div className="wordmark-text">Arbor</div>
+                    <span className="wordmark-b">&lt;</span>
+                    <span className="wordmark-1">Hunter</span>
+                    <span className="wordmark-slash">/</span>
+                    <span className="wordmark-2">Plan</span>
+                    <span className="wordmark-b">&gt;</span>
                 </div>
                 <h1 className="auth-title">
                     {("Create your planner" if mode == "signup" else "Welcome back")}
                 </h1>
                 <p className="auth-sub">
-                    Coursework, focus blocks and habits -- on the web, on your
+                    Coursework, focus blocks and habits — on the web, on your
                     phone, and in your terminal.
                 </p>
                 {(<div className="banner banner-error">{error}</div>) if error else None}

@@ -1,4 +1,4 @@
-"""Shared plumbing for the Arbor CLI: session, bridge wiring, and output.
+"""Shared plumbing for the HunterPlan CLI: session, bridge wiring, and output.
 
 The CLI is a real client of the `planner` service, not a second
 implementation of it. Commands `import from core.planner { ... }`, which the
@@ -34,7 +34,7 @@ glob EXIT_OK: int = 0,
 
 glob START_HINT: str = "hint: start the planner with `jac run` in the repo root";
 
-glob LOGIN_HINT: str = "hint: sign in first with `arbor login <username>`";
+glob LOGIN_HINT: str = "hint: sign in first with `hunt login <username>`";
 
 obj Session {
     """What the CLI remembers between invocations."""
@@ -45,10 +45,10 @@ obj Session {
 }
 
 
-"""Where the session file lives; override with ARBOR_HOME."""
+"""Where the session file lives; override with HUNTERPLAN_HOME."""
 def session_path -> Path {
-    home = os.environ.get("ARBOR_HOME", "").strip();
-    base = Path(home) if home else Path.home() / ".arbor";
+    home = os.environ.get("HUNTERPLAN_HOME", "").strip();
+    base = Path(home) if home else Path.home() / ".hunterplan";
     return base / "session.json";
 }
 
@@ -71,9 +71,9 @@ def load_session -> Session {
         }
     }
     return Session(
-        server=os.environ.get("ARBOR_SERVER", "").strip()
+        server=os.environ.get("HUNTERPLAN_SERVER", "").strip()
             or str(stored.get("server", "") or DEFAULT_SERVER),
-        token=os.environ.get("ARBOR_TOKEN", "").strip()
+        token=os.environ.get("HUNTERPLAN_TOKEN", "").strip()
             or str(stored.get("token", "") or ""),
         username=str(stored.get("username", "") or "")
     );
@@ -129,20 +129,20 @@ def explain(error: BridgeError) -> int {
     where = PROVIDER_APP + "." + error.name if error.name else PROVIDER_APP;
     detail = f" ({error.detail})" if error.detail else "";
     if isinstance(error, BridgeUnavailable) {
-        warn(f"arbor: cannot reach the planner service{detail}");
+        warn(f"hunt: cannot reach the planner service{detail}");
         warn(START_HINT);
         return EXIT_UNAVAILABLE;
     }
     if isinstance(error, BridgeTimeout) {
-        warn(f"arbor: {where} timed out{detail}");
+        warn(f"hunt: {where} timed out{detail}");
         return EXIT_TIMEOUT;
     }
     if isinstance(error, BridgeRejected) {
-        warn(f"arbor: the planner refused the call{detail}");
+        warn(f"hunt: the planner refused the call{detail}");
         warn(LOGIN_HINT);
         return EXIT_AUTH;
     }
-    warn(f"arbor: {where} failed{detail}");
+    warn(f"hunt: {where} failed{detail}");
     return EXIT_FAILURE;
 }
 
@@ -154,11 +154,11 @@ def exit_code_for(error: Exception) -> int {
     }
     text = str(error);
     if "UNAUTHORIZED" in text.upper() {
-        warn("arbor: your session is not valid any more");
+        warn("hunt: your session is not valid any more");
         warn(LOGIN_HINT);
         return EXIT_AUTH;
     }
-    warn("arbor: " + (text or "something went wrong"));
+    warn("hunt: " + (text or "something went wrong"));
     return EXIT_FAILURE;
 }
 
@@ -196,14 +196,18 @@ import from core.contracts { NO_DUE_DATE, TaskView }
 
 glob COLOR_STATE: list[bool] = [];
 
+# Bright ANSI codes, chosen to land near the maize-and-blue the web and
+# mobile clients paint with.
 glob DIM: str = "2",
      BOLD: str = "1",
-     RED: str = "31",
-     GREEN: str = "32",
-     YELLOW: str = "33",
-     BLUE: str = "34",
-     MAGENTA: str = "35",
-     CYAN: str = "36";
+     MAIZE: str = "93",
+     BLUE: str = "94",
+     GREEN: str = "92",
+     PINK: str = "95",
+     CYAN: str = "96",
+     RED: str = "91",
+     YELLOW: str = "93",
+     MAGENTA: str = "95";
 
 
 """Whether to emit ANSI codes: only on a terminal, and never under NO_COLOR."""
@@ -272,10 +276,10 @@ def due_text(task: TaskView) -> str {
         return paint("someday", DIM);
     }
     if task.days_until < 0 {
-        return paint("overdue " + str(-task.days_until) + "d", RED);
+        return paint("overdue " + str(-task.days_until) + "d", PINK);
     }
     if task.days_until == 0 {
-        return paint("today", YELLOW);
+        return paint("today", MAIZE);
     }
     if task.days_until == 1 {
         return "tomorrow";
@@ -287,10 +291,10 @@ def due_text(task: TaskView) -> str {
 """Colour a priority word by how loudly it should shout."""
 def priority_text(priority: str) -> str {
     if priority == "critical" {
-        return paint(priority, RED);
+        return paint(priority, PINK);
     }
     if priority == "high" {
-        return paint(priority, YELLOW);
+        return paint(priority, MAIZE);
     }
     if priority == "low" {
         return paint(priority, DIM);
@@ -303,7 +307,7 @@ def priority_text(priority: str) -> str {
 def task_line(task: TaskView) -> str {
     mark = paint("✔", GREEN) if task.done else "·";
     title = paint(fit(task.title, 38), DIM) if task.done else fit(task.title, 38);
-    course = paint(fit(task.course_code or "—", 9), CYAN);
+    course = paint(fit(task.course_code or "—", 9), BLUE);
     return (
         "  "
             + paint(short_id(task.id), DIM)
@@ -331,6 +335,18 @@ def heading(label: str, count: int) {
 def heading_note(label: str, note: str) {
     print();
     print(paint(label.upper(), BOLD) + paint("  " + note, DIM));
+}
+
+
+"""The bracketed wordmark, the same one the web and phone clients wear."""
+def wordmark -> str {
+    return (
+        paint("<", GREEN)
+            + paint("Hunter", BLUE)
+            + paint("/", DIM)
+            + paint("Plan", MAIZE)
+            + paint(">", GREEN)
+    );
 }
 
 
@@ -367,7 +383,7 @@ def resolve_task(needle: str, tasks: list[TaskView]) -> TaskView | None {
     }
     candidates = by_prefix + [t for t in by_title if t not in by_prefix];
     if len(candidates) > 1 {
-        warn("arbor: \"" + needle + "\" matches more than one task:");
+        warn("hunt: \"" + needle + "\" matches more than one task:");
         for task in candidates[:8] {
             warn("    " + short_id(task.id) + "  " + task.title);
         }

@@ -96,9 +96,9 @@ test "a session round-trips through its file" {
     import os;
     import tempfile;
     with tempfile.TemporaryDirectory() as folder {
-        os.environ["ARBOR_HOME"] = folder;
-        os.environ.pop("ARBOR_TOKEN", None);
-        os.environ.pop("ARBOR_SERVER", None);
+        os.environ["HUNTERPLAN_HOME"] = folder;
+        os.environ.pop("HUNTERPLAN_TOKEN", None);
+        os.environ.pop("HUNTERPLAN_SERVER", None);
         save_session(Session(server="http://example.test", token="abc", username="hunter"));
         restored = load_session();
         assert restored.server == "http://example.test";
@@ -106,6 +106,6 @@ test "a session round-trips through its file" {
         assert restored.username == "hunter";
         clear_session();
         assert load_session().token == "";
-        os.environ.pop("ARBOR_HOME", None);
+        os.environ.pop("HUNTERPLAN_HOME", None);
     }
 }

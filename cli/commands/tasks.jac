@@ -27,11 +27,12 @@ import from cli.commands.common {
     resolve_task,
     short_id,
     task_line,
-    warn
+    warn,
+    wordmark
 }
 
 
-"""`arbor today` -- the whole day in one screen."""
+"""`hunt today` -- the whole day in one screen."""
 async def run_today -> int {
     try {
         day = await agenda("");
@@ -40,7 +41,9 @@ async def run_today -> int {
     }
     print();
     print(
-        paint(day.weekday + ", " + day.date, BOLD)
+        wordmark()
+            + "  "
+            + paint(day.weekday + ", " + day.date, BOLD)
             + paint(
                 "   " + duration(day.load_minutes) + " of work · capacity " + duration(day.capacity_minutes),
                 DIM
@@ -90,11 +93,11 @@ async def run_today -> int {
 }
 
 
-"""`arbor add "<one line>"` -- natural-language capture from the terminal."""
+"""`hunt add "<one line>"` -- natural-language capture from the terminal."""
 async def run_add(capture: str) -> int {
     text = capture.strip();
     if not text {
-        warn("arbor add: nothing to add");
+        warn("hunt add: nothing to add");
         return EXIT_USAGE;
     }
     try {
@@ -103,7 +106,7 @@ async def run_add(capture: str) -> int {
         return exit_code_for(e);
     }
     if not result.task.id {
-        warn("arbor add: " + result.interpreted);
+        warn("hunt add: " + result.interpreted);
         return EXIT_FAILURE;
     }
     print(
@@ -118,7 +121,7 @@ async def run_add(capture: str) -> int {
 }
 
 
-"""`arbor ls` -- the open queue, most urgent first."""
+"""`hunt ls` -- the open queue, most urgent first."""
 async def run_list(include_done: bool, course: str) -> int {
     try {
         tasks = await list_tasks(include_done, course);
@@ -126,7 +129,7 @@ async def run_list(include_done: bool, course: str) -> int {
         return exit_code_for(e);
     }
     if not tasks {
-        print(paint("nothing here yet -- try `arbor add \"read chapter 7 by friday\"`", DIM));
+        print(paint("nothing here yet -- try `hunt add \"read chapter 7 by friday\"`", DIM));
         return EXIT_OK;
     }
     minutes = sum([t.estimate_minutes for t in tasks if not t.done]);
@@ -147,12 +150,12 @@ async def find(needle: str) -> any {
 }
 
 
-"""`arbor done <id|title>` / `arbor undone <id|title>`."""
+"""`hunt done <id|title>` / `hunt undone <id|title>`."""
 async def run_complete(needle: str, done: bool) -> int {
     try {
         task = await find(needle);
         if task is None {
-            warn("arbor: no task matched \"" + needle + "\"");
+            warn("hunt: no task matched \"" + needle + "\"");
             return EXIT_USAGE;
         }
         updated = await set_task_done(task.id, done);
@@ -160,7 +163,7 @@ async def run_complete(needle: str, done: bool) -> int {
         return exit_code_for(e);
     }
     if updated is None {
-        warn("arbor: that task no longer exists");
+        warn("hunt: that task no longer exists");
         return EXIT_FAILURE;
     }
     verb = "completed" if done else "reopened";
@@ -169,12 +172,12 @@ async def run_complete(needle: str, done: bool) -> int {
 }
 
 
-"""`arbor rm <id|title>`."""
+"""`hunt rm <id|title>`."""
 async def run_remove(needle: str) -> int {
     try {
         task = await find(needle);
         if task is None {
-            warn("arbor: no task matched \"" + needle + "\"");
+            warn("hunt: no task matched \"" + needle + "\"");
             return EXIT_USAGE;
         }
         outcome = await remove_task(task.id);
@@ -186,12 +189,12 @@ async def run_remove(needle: str) -> int {
 }
 
 
-"""`arbor split <id|title>` -- break a big task into work sessions."""
+"""`hunt split <id|title>` -- break a big task into work sessions."""
 async def run_split(needle: str) -> int {
     try {
         task = await find(needle);
         if task is None {
-            warn("arbor: no task matched \"" + needle + "\"");
+            warn("hunt: no task matched \"" + needle + "\"");
             return EXIT_USAGE;
         }
         result = await breakdown_task(task.id);
@@ -199,7 +202,7 @@ async def run_split(needle: str) -> int {
         return exit_code_for(e);
     }
     if not result.subtasks {
-        warn("arbor split: nothing to split");
+        warn("hunt split: nothing to split");
         return EXIT_FAILURE;
     }
     print(

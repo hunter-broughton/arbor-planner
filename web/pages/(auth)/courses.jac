@@ -182,7 +182,11 @@ def:pub page -> JsxPage {
             ) if len(courses) == 0 else (
                 <div className="grid-cards">
                     {[
-                        <div key={course.id} className="card course-card">
+                        <div
+                            key={course.id}
+                            className="card course-card rise"
+                            style={{"--accent-color": course.color}}
+                        >
                             <div className="row spread">
                                 <div className="row">
                                     <span

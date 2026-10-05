@@ -142,11 +142,11 @@ def:priv ai_model_name -> str {
 
 """Whether a model is actually reachable right now.
 
-Set `ARBOR_DISABLE_AI=1` to force the deterministic path -- useful for tests
+Set `HUNTERPLAN_NO_AI=1` to force the deterministic path -- useful for tests
 and for demonstrating that the planner is fully functional without a model.
 """
 def:priv ai_available -> bool {
-    if os.environ.get("ARBOR_DISABLE_AI", "").strip() {
+    if os.environ.get("HUNTERPLAN_NO_AI", "").strip() {
         return False;
     }
     model = ai_model_name();

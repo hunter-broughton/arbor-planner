@@ -9,10 +9,14 @@ def:pub TaskRow(
     onToggle: Callable[[], None],
     onDelete: Callable[[], None],
     onBreakdown: Callable[[], None],
+    pending: bool = False,
     busy: bool = False
 ) -> JsxElement {
+    # While a toggle is in flight, show the state the user asked for. The
+    # next refresh either confirms it or quietly puts it back.
+    done = task.done != pending;
     rowClass = "task";
-    if task.done {
+    if done {
         rowClass += " is-done";
     }
     if task.parent_id {
@@ -21,7 +25,7 @@ def:pub TaskRow(
     return
         <div className={rowClass}>
             <button
-                className={"task-check is-done" if task.done else "task-check"}
+                className={"task-check is-done" if done else "task-check"}
                 onClick={onToggle}
                 aria-label="Toggle complete"
             >
@@ -60,7 +64,7 @@ def:pub TaskRow(
                     >
                         Split
                     </button>
-                ) if not task.done and not task.parent_id else None}
+                ) if not done and not task.parent_id else None}
                 <button className="btn btn-danger btn-sm" onClick={onDelete}>
                     Delete
                 </button>

@@ -27,10 +27,10 @@ import from cli.commands.common {
 }
 
 
-"""Read a password without echoing it, or take ARBOR_PASSWORD for scripts."""
+"""Read a password without echoing it, or take HUNTERPLAN_PASSWORD for scripts."""
 def read_password(prompt: str) -> str {
     import os;
-    preset = os.environ.get("ARBOR_PASSWORD", "");
+    preset = os.environ.get("HUNTERPLAN_PASSWORD", "");
     if preset {
         return preset;
     }
@@ -48,13 +48,13 @@ def error_message(payload: dict[str, any]) -> str {
 }
 
 
-"""`arbor login <username>` -- exchange credentials for a stored token."""
+"""`hunt login <username>` -- exchange credentials for a stored token."""
 async def run_login(username: str, server: str, register: bool) -> int {
     session = load_session();
     target = (server or session.server).rstrip("/");
     password = read_password("password for " + username + ": ");
     if not password {
-        warn("arbor login: no password given");
+        warn("hunt login: no password given");
         return EXIT_AUTH;
     }
     if register {
@@ -67,7 +67,7 @@ async def run_login(username: str, server: str, register: bool) -> int {
             }
         );
         if not created.get("ok") {
-            warn("arbor login: could not create that account -- " + error_message(created));
+            warn("hunt login: could not create that account -- " + error_message(created));
             return EXIT_AUTH;
         }
     }
@@ -80,13 +80,13 @@ async def run_login(username: str, server: str, register: bool) -> int {
         }
     );
     if not answer.get("ok") {
-        warn("arbor login: " + error_message(answer));
+        warn("hunt login: " + error_message(answer));
         return EXIT_AUTH;
     }
     data = answer.get("data") or {};
     token = str(data.get("token", "") or "");
     if not token {
-        warn("arbor login: the server returned no token");
+        warn("hunt login: the server returned no token");
         return EXIT_AUTH;
     }
     save_session(Session(server=target, token=token, username=username));
@@ -95,7 +95,7 @@ async def run_login(username: str, server: str, register: bool) -> int {
 }
 
 
-"""`arbor logout` -- forget the stored token."""
+"""`hunt logout` -- forget the stored token."""
 def run_logout -> int {
     clear_session();
     print("signed out");
@@ -103,7 +103,7 @@ def run_logout -> int {
 }
 
 
-"""`arbor status` -- service health, capability and current identity."""
+"""`hunt status` -- service health, capability and current identity."""
 async def run_status -> int {
     session = load_session();
     connect(session);
@@ -112,7 +112,7 @@ async def run_status -> int {
     } except Exception as e {
         return exit_code_for(e);
     }
-    print(paint("Arbor planner", BOLD));
+    print(paint("HunterPlan planner", BOLD));
     print("  server      " + session.server);
     print("  service     " + paint("reachable", GREEN) + "  ·  " + status.server_date);
     print(
@@ -120,7 +120,7 @@ async def run_status -> int {
             + (paint(status.ai_model, CYAN) if status.ai_enabled else paint("not configured (deterministic fallbacks in use)", DIM))
     );
     if not session.token {
-        print("  signed in   " + paint("no -- run `arbor login <username>`", DIM));
+        print("  signed in   " + paint("no -- run `hunt login <username>`", DIM));
         return EXIT_OK;
     }
     try {

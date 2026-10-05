@@ -1,4 +1,4 @@
-"""`arbor` -- the Arbor planner from the terminal.
+"""`hunt` -- the HunterPlan planner from the terminal.
 
 A thin, fast client of the `planner` service. Every subcommand below is a
 bridged call to the same endpoints the web app and the phone app use, which
@@ -7,9 +7,9 @@ of its own.
 
     jac run cli -- today
     jac run cli -- add "EECS 449 project proposal due friday 5pm ~3h urgent"
-    ./arbor done pagination
+    ./hunt done pagination
 
-`./arbor` is a one-line wrapper over `jac run cli --`.
+`./hunt` is a one-line wrapper over `jac run cli --`.
 """
 
 import argparse;
@@ -44,18 +44,18 @@ import from cli.commands.tasks {
     run_today
 }
 
-glob PROG: str = "arbor";
+glob PROG: str = "hunt";
 
 glob EPILOG: str = """examples:
-  arbor login hunter                      sign in (use --register the first time)
-  arbor today                             the whole day in one screen
-  arbor add "EECS 449 proposal due fri 5pm ~3h urgent"
-  arbor ls --course "EECS 485"            open work for one class
-  arbor done pagination                   complete by id prefix or title match
-  arbor split "project proposal"          break a big task into work sessions
-  arbor plan --minutes 300                build a time-blocked day
-  arbor week --offset 1                   look at next week
-  arbor check gym                         tick a habit for today
+  hunt login hunter                      sign in (use --register the first time)
+  hunt today                             the whole day in one screen
+  hunt add "EECS 449 proposal due fri 5pm ~3h urgent"
+  hunt ls --course "EECS 485"            open work for one class
+  hunt done pagination                   complete by id prefix or title match
+  hunt split "project proposal"          break a big task into work sessions
+  hunt plan --minutes 300                build a time-blocked day
+  hunt week --offset 1                   look at next week
+  hunt check gym                         tick a habit for today
 """;
 
 
@@ -63,7 +63,7 @@ glob EPILOG: str = """examples:
 def build_parser -> argparse.ArgumentParser {
     parser = argparse.ArgumentParser(
         prog=PROG,
-        description="Arbor -- a personal academic planner, from the terminal.",
+        description="HunterPlan -- a personal academic planner, from the terminal.",
         epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter
     );
@@ -236,7 +236,7 @@ async def dispatch(args: any) -> int {
     if command == "reset" {
         return await run_data(True);
     }
-    warn("arbor: unknown command " + command);
+    warn("hunt: unknown command " + command);
     return EXIT_USAGE;
 }
 

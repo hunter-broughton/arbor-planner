@@ -3,7 +3,7 @@
 **EECS 449 · Extra Credit 1 · Fall 2026**
 
 - **Name:** Hunter Broughton
-- **UMID:** `<<FILL IN BEFORE SUBMITTING>>`
+- **UMID:** 6287 1228
 - **uniqname:** huntbro
 
 HunterPlan is the planner I actually want for a semester of EECS: it holds my

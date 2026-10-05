@@ -128,6 +128,13 @@ def connect(session: Session) {
 def explain(error: BridgeError) -> int {
     where = PROVIDER_APP + "." + error.name if error.name else PROVIDER_APP;
     detail = f" ({error.detail})" if error.detail else "";
+    # A rejected token arrives wrapped in a transport error. Say the useful
+    # thing rather than relaying the RPC envelope.
+    if "UNAUTHORIZED" in str(error.detail).upper() {
+        warn("hunt: the planner did not accept your session");
+        warn(LOGIN_HINT);
+        return EXIT_AUTH;
+    }
     if isinstance(error, BridgeUnavailable) {
         warn(f"hunt: cannot reach the planner service{detail}");
         warn(START_HINT);

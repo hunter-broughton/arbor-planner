@@ -74,7 +74,7 @@ def:pub DayPlanCard(
                                 ) if isLive(block.start_min, block.end_min) else None}
                                 <div
                                     className={
-                                        ("slot is-break" if block.kind == "break" else "slot")
+                                        ("slot is-" + block.kind if block.kind != "focus" else "slot")
                                             + (" is-past" if block.end_min <= nowMinutes else "")
                                     }
                                 >

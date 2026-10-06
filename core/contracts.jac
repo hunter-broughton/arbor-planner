@@ -43,6 +43,7 @@ obj TaskView {
         due_time: str = "",
         estimate_minutes: int = 30,
         done: bool = False,
+        fixed: bool = False,
         done_at: str = "",
         created_at: str = "",
         course_id: str = "",

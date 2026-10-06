@@ -104,6 +104,51 @@ test "completed work is never scheduled" {
     assert unplanned == [];
 }
 
+test "an appointment lands at its own time and work flows around it" {
+    exam = sample("Midterm I", "critical", "exam", 0, 90);
+    exam.fixed = True;
+    exam.due_date = "2026-10-07";
+    exam.due_time = "18:00";
+    study = sample("Review the slides", "high", "exam", 0, 240);
+    (blocks, _) = schedule_day([exam, study], "2026-10-07", 540, 1320, 300);
+    sitting = [b for b in blocks if b.kind == "commitment"];
+    assert len(sitting) == 1;
+    assert sitting[0].start_min == 18 * 60;
+    assert sitting[0].label == "Midterm I";
+    # Nothing else may overlap the exam.
+    for block in blocks {
+        if block.kind == "commitment" {
+            continue;
+        }
+        assert block.end_min <= sitting[0].start_min or block.start_min >= sitting[0].end_min;
+    }
+    # The studying still got scheduled.
+    assert len([b for b in blocks if b.kind == "focus"]) >= 1;
+}
+
+test "an appointment on another day is not today's work" {
+    exam = sample("Midterm I", "critical", "exam", 2, 90);
+    exam.fixed = True;
+    exam.due_date = "2026-10-07";
+    exam.due_time = "18:00";
+    chore = sample("Email the advisor", "high", "admin", 0, 20);
+    (blocks, unplanned) = schedule_day([exam, chore], "2026-10-05", 540, 1320, 240);
+    # The exam sitting is neither scheduled nor reported as left over -- it
+    # simply is not work for today.
+    assert [b.label for b in blocks if b.kind != "break"] == ["Email the advisor"];
+    assert [t.title for t in unplanned] == [];
+}
+
+test "a fixed task with no usable time falls back to ordinary work" {
+    odd = sample("Section", "medium", "admin", 0, 60);
+    odd.fixed = True;
+    odd.due_date = "2026-10-05";
+    odd.due_time = "";
+    (blocks, _) = schedule_day([odd], "2026-10-05", 540, 1320, 240);
+    assert len([b for b in blocks if b.kind == "focus"]) == 1;
+    assert len([b for b in blocks if b.kind == "commitment"]) == 0;
+}
+
 test "every block carries a reason a person can read" {
     tasks = [sample("late", "high", "assignment", -2, 45)];
     (blocks, _) = schedule_day(tasks, "2026-10-04", 540, 1320, 120);

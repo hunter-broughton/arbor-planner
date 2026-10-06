@@ -70,6 +70,12 @@ are overdue, how many land this week.
 **Habits** with daily or weekly cadence, a target per period, and streaks that
 do not break just because today is not finished yet.
 
+**Appointments, not just work.** An exam sitting happens at 6pm on Wednesday
+whether you plan for it or not. Tasks marked fixed are placed on the schedule
+at their stated time and the day's work flows around them — and a fixed item
+on *another* day is left out of today's plan entirely, instead of being
+sliced into study blocks two days early.
+
 **Per-user accounts.** Every endpoint runs against the caller's own graph, so
 two students on one deployment never see each other's work.
 
@@ -128,9 +134,12 @@ jac run         # starts the web app and the planner service
 > ```
 
 Open <http://localhost:8000>, click **Create one**, pick any username and
-password, and you are in. On the **Settings** page, press **Seed** to fill the
-account with a sample term (4 courses, 10 tasks, 3 habits) so there is
-something to look at immediately.
+password, and you are in. On the **Settings** page, press **Seed** to load my
+actual Fall 2026 term so there is something real to look at immediately —
+EECS 449, ECON 402 and MIDEAST 207, with the deadlines taken straight off the
+three syllabi: Prof. Bachmann's three fixed midterm dates, Prof. Eliav's
+Thursday-11 PM weekly assignments and October midterm, and this course's own
+Friday snippets, MVP Pitch Week and Launch Week.
 
 `jac run` is all it takes: `default-app = "web"` in `jac.toml`, and the
 `planner` service app is colocated into the same process, so one command
@@ -174,6 +183,7 @@ The fastest way in and out of the planner, and the surface I use most.
 ./hunt today
 ./hunt add "EECS 485 project 4 map reduce due next friday 11:59pm ~6h urgent"
 ./hunt plan --minutes 300
+./hunt plan --date 2026-10-07          # the day of the ECON 402 midterm
 ./hunt done pagination
 ```
 
@@ -292,7 +302,7 @@ jac run planner
 | `done <handle>` / `undone <handle>` | Complete or reopen a task |
 | `rm <handle>` | Delete a task and its subtasks |
 | `split <handle>` | Break a task into sequential work sessions |
-| `plan [--minutes N] [--show] [--clear]` | Build, show or clear today's schedule |
+| `plan [--minutes N] [--date D] [--show] [--clear]` | Build, show or clear a day's schedule |
 | `week [--offset N]` | Seven days of deadlines |
 | `courses` · `course add <code>` · `course rm <code>` | Manage courses |
 | `habits` · `habit add <title> [--weekly] [--target N]` | Manage habits |

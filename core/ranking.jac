@@ -168,13 +168,100 @@ def:priv slot_length(task: TaskView, remaining: int) -> int {
 }
 
 
-"""Carve a day into focus blocks, most urgent work first.
+"""Parse "HH:MM" into minutes from midnight; -1 when it is not a time."""
+def:priv clock_minutes(value: str) -> int {
+    parts = (value or "").split(":");
+    if len(parts) != 2 or not parts[0].isdigit() or not parts[1].isdigit() {
+        return -1;
+    }
+    hours = int(parts[0]);
+    mins = int(parts[1]);
+    if hours > 23 or mins > 59 {
+        return -1;
+    }
+    return hours * 60 + mins;
+}
+
+
+"""Split a pool into the appointments for `date` and the work to fit around them.
+
+A `fixed` task is an appointment: an exam sitting, a section, anything that
+happens at its stated time. One falling on `date` becomes a commitment block
+at that time; one falling on any other day is not today's work at all and is
+dropped from the pool rather than scheduled as effort.
+"""
+def:priv split_commitments(
+    tasks: list[TaskView], date: str
+) -> tuple[list[BlockView], list[TaskView]] {
+    commitments: list[BlockView] = [];
+    flexible: list[TaskView] = [];
+    for task in tasks {
+        if not task.fixed {
+            flexible.append(task);
+            continue;
+        }
+        if task.due_date != date {
+            continue;
+        }
+        start = clock_minutes(task.due_time);
+        if start < 0 {
+            flexible.append(task);
+            continue;
+        }
+        length = max(MIN_BLOCK, min(MAX_BLOCK * 3, task.estimate_minutes));
+        commitments.append(
+            BlockView(
+                label=task.title,
+                date=date,
+                start_min=start,
+                end_min=min(24 * 60 - 1, start + length),
+                task_id=task.id,
+                kind="commitment",
+                rationale="fixed on your calendar"
+            )
+        );
+    }
+    return (sorted(commitments, key=block_start), flexible);
+}
+
+
+"""Sort key for blocks by start time."""
+def:priv block_start(block: BlockView) -> int {
+    return block.start_min;
+}
+
+
+"""The first minute at or after `cursor` with `want` free minutes before the
+next commitment, or -1 when the day has no room left."""
+def:priv next_gap(
+    cursor: int, want: int, day_end: int, commitments: list[BlockView]
+) -> int {
+    at = cursor;
+    moved = True;
+    while moved {
+        moved = False;
+        for block in commitments {
+            if at < block.end_min and at + want > block.start_min {
+                at = block.end_min;
+                moved = True;
+            }
+        }
+    }
+    if at + want > day_end {
+        return -1;
+    }
+    return at;
+}
+
+
+"""Carve a day into focus blocks, most urgent work first, around commitments.
 
 `cursor` walks forward from `day_start`; each task gets at most `MAX_BLOCK`
 minutes before a break is inserted, and the walk stops once either the
-day window or the user's declared capacity runs out. Tasks that never got a
-slot come back in the second element so the caller can show them honestly
-rather than silently dropping them.
+day window or the user's declared capacity runs out. Appointments are placed
+first and the work flows around them. Tasks that never got a slot come back
+in the second element so the caller can show them honestly rather than
+silently dropping them.
 """
 def:priv schedule_day(
     tasks: list[TaskView],
@@ -183,18 +270,30 @@ def:priv schedule_day(
     day_end: int,
     capacity_minutes: int
 ) -> tuple[list[BlockView], list[TaskView]] {
-    ordered = rank([t for t in tasks if not t.done]);
-    blocks: list[BlockView] = [];
+    (commitments, pool) = split_commitments([t for t in tasks if not t.done], date);
+    ordered = rank(pool);
+    blocks: list[BlockView] = commitments[:];
     unplanned: list[TaskView] = [];
     cursor = day_start;
     budget = max(0, capacity_minutes);
     placed = 0;
     for task in ordered {
-        if budget < MIN_BLOCK or cursor + MIN_BLOCK > day_end {
+        if budget < MIN_BLOCK {
             unplanned.append(task);
             continue;
         }
-        length = slot_length(task, min(budget, day_end - cursor));
+        start = next_gap(cursor, MIN_BLOCK, day_end, commitments);
+        if start < 0 {
+            unplanned.append(task);
+            continue;
+        }
+        room = day_end - start;
+        for block in commitments {
+            if block.start_min > start {
+                room = min(room, block.start_min - start);
+            }
+        }
+        length = slot_length(task, min(budget, room));
         if length < MIN_BLOCK {
             unplanned.append(task);
             continue;
@@ -203,18 +302,19 @@ def:priv schedule_day(
             BlockView(
                 label=task.title,
                 date=date,
-                start_min=cursor,
-                end_min=cursor + length,
+                start_min=start,
+                end_min=start + length,
                 task_id=task.id,
                 kind="focus",
                 rationale=rationale_for(task)
             )
         );
-        cursor += length;
+        cursor = start + length;
         budget -= length;
         placed += 1;
         pause = LONG_BREAK if placed % BLOCKS_BEFORE_LONG_BREAK == 0 else SHORT_BREAK;
-        if budget >= MIN_BLOCK and cursor + pause + MIN_BLOCK <= day_end {
+        gap = next_gap(cursor, pause + MIN_BLOCK, day_end, commitments);
+        if budget >= MIN_BLOCK and gap == cursor {
             blocks.append(
                 BlockView(
                     label="Break",
@@ -229,7 +329,7 @@ def:priv schedule_day(
             cursor += pause;
         }
     }
-    return (blocks, unplanned);
+    return (sorted(blocks, key=block_start), unplanned);
 }
 
 

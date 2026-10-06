@@ -103,6 +103,7 @@ def build_parser -> argparse.ArgumentParser {
     planner.add_argument("--minutes", `type=int, `default=0, help="focus budget for today");
     planner.add_argument("--show", action="store_true", help="show the stored plan without rebuilding");
     planner.add_argument("--clear", action="store_true", help="throw the stored plan away");
+    planner.add_argument("--date", `default="", help="plan another day, YYYY-MM-DD");
 
     week = commands.add_parser("week", help="seven days of deadlines");
     week.add_argument("--offset", `type=int, `default=0, help="weeks from this one");
@@ -130,7 +131,7 @@ def build_parser -> argparse.ArgumentParser {
     unchecker = commands.add_parser("uncheck", help="undo today's check-in");
     unchecker.add_argument("habit");
 
-    commands.add_parser("seed", help="fill an empty account with a sample term");
+    commands.add_parser("seed", help="fill an empty account with my real Fall 2026 term");
     commands.add_parser("reset", help="delete every course, task, plan and habit");
     return parser;
 }
@@ -196,9 +197,11 @@ async def dispatch(args: any) -> int {
     }
     if command == "plan" {
         if flag_of(args, "clear") {
-            return await run_clear_plan();
+            return await run_clear_plan(text_of(args, "date"));
         }
-        return await run_plan(number_of(args, "minutes"), flag_of(args, "show"));
+        return await run_plan(
+            number_of(args, "minutes"), flag_of(args, "show"), text_of(args, "date")
+        );
     }
     if command == "week" {
         return await run_week(number_of(args, "offset"));

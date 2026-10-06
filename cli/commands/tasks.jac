@@ -16,6 +16,7 @@ import from cli.commands.common {
     EXIT_OK,
     EXIT_USAGE,
     GREEN,
+    PINK,
     YELLOW,
     clock,
     duration,
@@ -64,6 +65,9 @@ async def run_today -> int {
         heading("day plan", len([b for b in day.blocks if b.kind == "focus"]));
         for block in day.blocks {
             label = block.label if block.kind == "focus" else paint(block.label, DIM);
+            if block.kind == "commitment" {
+                label = paint(block.label, PINK);
+            }
             print(
                 "  "
                     + paint(clock(block.start_min) + "–" + clock(block.end_min), DIM)

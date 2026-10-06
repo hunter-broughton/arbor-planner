@@ -115,7 +115,13 @@ node Course {
 }
 
 node Task {
-    """One unit of work. Subtasks are Tasks too, linked by a `Splits` edge."""
+    """One unit of work. Subtasks are Tasks too, linked by a `Splits` edge.
+
+    `fixed` marks an appointment rather than work: an exam sitting, a lab
+    section, anything that happens at a stated time whether you plan for it
+    or not. The day planner places these where they belong and schedules
+    around them instead of treating them as a block of effort to slot in.
+    """
 
     has title: str = "",
         notes: str = "",
@@ -125,6 +131,7 @@ node Task {
         due_time: str = "",
         estimate_minutes: int = 30,
         done: bool = False,
+        fixed: bool = False,
         done_at: str = "",
         created_at: str = "",
         origin: str = "manual";
@@ -299,6 +306,7 @@ def:priv task_view(task: Task, today: str) -> TaskView {
         due_time=task.due_time,
         estimate_minutes=task.estimate_minutes,
         done=task.done,
+        fixed=task.fixed,
         done_at=task.done_at,
         created_at=task.created_at,
         course_id=jid(course) if course is not None else "",
@@ -694,7 +702,8 @@ def:priv create_task(
     due_time: str,
     estimate_minutes: int,
     course: Course | None,
-    origin: str
+    origin: str,
+    fixed: bool = False
 ) -> Task {
     task = (
         root ++> Task(
@@ -705,6 +714,7 @@ def:priv create_task(
             due_date=normalize_date(due_date),
             due_time=clean_text(due_time, 5),
             estimate_minutes=max(5, min(1440, estimate_minutes)),
+            fixed=fixed,
             created_at=now_iso(),
             origin=origin
         )
@@ -890,7 +900,8 @@ def:protect add_task(
     kind: str = "task",
     priority: str = "medium",
     estimate_minutes: int = 0,
-    notes: str = ""
+    notes: str = "",
+    fixed: bool = False
 ) -> TaskView {
     course = course_by_id(course_id);
     minutes = estimate_minutes if estimate_minutes > 0 else 30;
@@ -903,7 +914,8 @@ def:protect add_task(
         due_time,
         minutes,
         course,
-        "manual"
+        "manual",
+        fixed
     );
     return task_view(task, today_iso());
 }
@@ -1267,12 +1279,22 @@ def:protect remove_goal(goal_id: str) -> OpResult {
 
 """Fill an empty account with my actual Fall 2026 term.
 
-The courses and every EECS 449 deadline below are real, lifted from the
-published course schedule at github.com/marsninja/CSE449-F26 -- weekly
-snippets every Friday, the Monday/Wednesday group updates, MVP Pitch Week,
-Launch Week and Reflection Week. Dates are stored as offsets from the term
-calendar rather than hard-coded, so the fixture still lands sensibly whenever
-it is run.
+Everything here is real, taken from the three course syllabi:
+
+- EECS 449, Prof. Mars (MW 1:30-3, 1311 EECS) -- the Friday snippets, the
+  Monday/Wednesday group updates with a working demo, MVP Pitch Week,
+  Launch Week and Reflection Week, from github.com/marsninja/CSE449-F26.
+- ECON 402, Prof. Bachmann (TuTh 1:00-2:30, 1800 CHEM) -- three
+  non-cumulative midterms on fixed dates, and eight problem sets.
+- MIDEAST 207, Prof. Eliav (TuTh 11:30-1:00, Thayer 4151) -- weekly
+  assignments announced Saturday and due Thursday 11 PM, the October
+  midterm, the Movie Night exercise, the term project and the take-home
+  final, plus the assigned reading for each lecture.
+
+Fixed deadlines carry their real dates. Weekly recurring work is computed
+from the current week so the fixture stays useful whenever it is run. The
+one projection is ECON 402's problem-set cadence past PS4, extrapolated
+from the PS1-PS4 pattern.
 
 Refuses to run when the account already holds data, so it can never clobber
 real planning.
@@ -1290,7 +1312,7 @@ def:protect seed_demo -> OpResult {
     catalog: list[tuple[str, str, int]] = [
         ("EECS 449", "Principles and Practice of Agentic AI", 4),
         ("ECON 402", "Intermediate Macroeconomic Theory", 4),
-        ("MIDEAST 207", "Middle East Studies", 3)
+        ("MIDEAST 207", "The Land of Israel/Palestine Through the Ages", 4)
     ];
     made: dict[str, Course] = {};
     for (index, (code, title, credits)) in enumerate(catalog) {
@@ -1306,16 +1328,118 @@ def:protect seed_demo -> OpResult {
         ) as Course;
         made[code] = course;
     }
-    # (course, title, kind, priority, days from this Monday, minutes, time)
-    plan: list[tuple[str, str, str, str, int, int, str]] = [
+    # Fixed deadlines, exactly as the syllabi set them.
+    # (course, title, kind, priority, date, time, minutes)
+    # (course, title, kind, priority, date, time, minutes, appointment?)
+    fixed: list[tuple[str, str, str, str, str, str, int, bool]] = [
+        (
+            "ECON 402",
+            "Midterm I -- non-cumulative, 75 min, closed book",
+            "exam",
+            "critical",
+            "2026-10-07",
+            "18:00",
+            90,
+            True
+        ),
+        ("ECON 402", "Midterm II", "exam", "critical", "2026-11-11", "18:00", 90, True),
+        ("ECON 402", "Midterm III", "exam", "critical", "2026-12-17", "16:00", 90, True),
+        (
+            "MIDEAST 207",
+            "Midterm (location TBA)",
+            "exam",
+            "critical",
+            "2026-10-26",
+            "19:00",
+            120,
+            True
+        ),
+        (
+            "MIDEAST 207",
+            "Paul in Athens movie night exercise",
+            "assignment",
+            "high",
+            "2026-10-30",
+            "23:00",
+            120,
+            False
+        ),
+        (
+            "MIDEAST 207",
+            "Term project",
+            "project",
+            "high",
+            "2026-11-30",
+            "23:00",
+            600,
+            False
+        ),
+        (
+            "MIDEAST 207",
+            "Final: take-home exam on Section Canvas",
+            "exam",
+            "critical",
+            "2026-12-18",
+            "17:00",
+            420,
+            False
+        ),
         (
             "EECS 449",
-            "Weekly snippet: what I built and what I learned",
+            "MVP Pitch Week: launch-ready demo for the class",
+            "project",
+            "high",
+            "2026-11-02",
+            "",
+            300,
+            False
+        ),
+        (
+            "EECS 449",
+            "Launch Week: push the marketing campaign live",
+            "project",
+            "high",
+            "2026-11-16",
+            "",
+            300,
+            False
+        ),
+        (
+            "EECS 449",
+            "Reflection Week: what we built and what we learned",
+            "project",
+            "medium",
+            "2026-12-07",
+            "",
+            180,
+            False
+        )
+    ];
+    for (code, title, kind, priority, date, at, minutes, appointment) in fixed {
+        create_task(
+            title,
+            "",
+            kind,
+            priority,
+            date,
+            at,
+            minutes,
+            made.get(code),
+            "seed",
+            appointment
+        );
+    }
+    # Recurring work, placed in the current week.
+    # (course, title, kind, priority, days from Monday, time, minutes)
+    weekly: list[tuple[str, str, str, str, int, str, int]] = [
+        (
+            "EECS 449",
+            "Weekly snippet: what I contributed and what I learned",
             "admin",
             "high",
             4,
-            45,
-            "23:59"
+            "23:59",
+            45
         ),
         (
             "EECS 449",
@@ -1323,27 +1447,68 @@ def:protect seed_demo -> OpResult {
             "project",
             "high",
             2,
-            90,
-            "13:30"
+            "13:30",
+            90
         ),
         (
             "EECS 449",
-            "Team project: move an issue through Flowline",
+            "Move a team issue through Flowline",
             "project",
             "medium",
             3,
-            180,
-            ""
+            "",
+            180
         ),
-        ("EECS 449", "Read the byLLM docs before lecture", "reading", "medium", 1, 45, ""),
-        ("ECON 402", "Midterm 1", "exam", "critical", 2, 240, ""),
-        ("ECON 402", "Problem set: IS-LM and aggregate demand", "assignment", "high", 4, 120, "23:59"),
-        ("MIDEAST 207", "Response paper", "assignment", "medium", 4, 120, "23:59"),
-        ("MIDEAST 207", "Weekly reading", "reading", "medium", 1, 90, ""),
-        ("", "Email advisor about winter registration", "admin", "high", 0, 15, ""),
-        ("", "Groceries and meal prep", "personal", "low", 1, 60, "")
+        (
+            "MIDEAST 207",
+            "Weekly assignment on Section Canvas",
+            "assignment",
+            "high",
+            3,
+            "23:00",
+            60
+        ),
+        (
+            "MIDEAST 207",
+            "Read AY 76-109 + course pack 22-23, 30-32 -- Eastern Superpowers",
+            "reading",
+            "medium",
+            1,
+            "11:30",
+            90
+        ),
+        (
+            "MIDEAST 207",
+            "Read AY 109-113 + course pack 35-37 -- Persian rule",
+            "reading",
+            "medium",
+            3,
+            "11:30",
+            60
+        ),
+        (
+            "ECON 402",
+            "Work the practice midterm: 4 parts, 75 points",
+            "exam",
+            "critical",
+            0,
+            "",
+            90
+        ),
+        (
+            "ECON 402",
+            "Review lecture slide sets 1-10 for Midterm I",
+            "exam",
+            "critical",
+            1,
+            "",
+            240
+        ),
+        ("ECON 402", "Problem set 5", "assignment", "high", 13, "23:59", 150),
+        ("", "Email advisor about winter registration", "admin", "high", 0, "", 15),
+        ("", "Groceries and meal prep", "personal", "low", 1, "", 60)
     ];
-    for (code, title, kind, priority, offset, minutes, at) in plan {
+    for (code, title, kind, priority, offset, at, minutes) in weekly {
         create_task(
             title,
             "",
@@ -1356,21 +1521,9 @@ def:protect seed_demo -> OpResult {
             "seed"
         );
     }
-    # The milestones that shape the rest of the semester.
-    milestones: list[tuple[str, str, int]] = [
-        ("MVP Pitch Week: launch-ready demo for the class", "project", 28),
-        ("Launch Week: push the marketing campaign live", "project", 42),
-        ("Reflection Week: what we built and what we learned", "project", 63)
-    ];
-    for (title, kind, offset) in milestones {
-        create_task(
-            title, "", kind, "high", shift_days(monday, offset), "", 240,
-            made.get("EECS 449"), "seed"
-        );
-    }
     habits: list[tuple[str, str, int]] = [
-        ("Write the weekly snippet", "weekly", 1),
-        ("Office hours (Tue/Thu 3-4, 4129 Lien)", "weekly", 1),
+        ("Write the EECS 449 snippet", "weekly", 1),
+        ("Office hours (Bachmann Tue 3-4, Eliav Thu 2-3)", "weekly", 1),
         ("Move for 30 minutes", "daily", 1)
     ];
     for (index, (title, cadence, target)) in enumerate(habits) {
@@ -1390,7 +1543,7 @@ def:protect seed_demo -> OpResult {
             );
         }
     }
-    total = len(plan) + len(milestones);
+    total = len(fixed) + len(weekly);
     return OpResult(
         ok=True,
         message=f"Seeded {len(catalog)} courses, {total} tasks and {len(habits)} habits."

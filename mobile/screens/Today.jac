@@ -157,10 +157,25 @@ def:pub Today -> JsxElement {
                                     {clock(block.start_min)}
                                 </Text>
                                 <View
-                                    style={[styles["slotBar"], styles["slotBarBreak"]] if block.kind == "break" else styles["slotBar"]}
+                                    style={[
+                                        styles["slotBar"],
+                                        styles["slotBarBreak"] if block.kind == "break" else (
+                                            styles["slotBarFixed"] if block.kind == "commitment" else {}
+                                        )
+                                    ]}
                                 />
                                 <View style={styles["grow"]}>
-                                    <Text style={styles["taskTitle"] if block.kind == "focus" else styles["muted"]}>
+                                    <Text
+                                        style={
+                                            styles["taskTitle"]
+                                                if block.kind == "focus"
+                                                else (
+                                                    styles["slotFixed"]
+                                                        if block.kind == "commitment"
+                                                        else styles["muted"]
+                                                )
+                                        }
+                                    >
                                         {block.label}
                                     </Text>
                                     <Text style={styles["faint"]}>

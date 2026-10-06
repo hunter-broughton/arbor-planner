@@ -111,6 +111,8 @@ glob:pub styles = StyleSheet.create(
         "slotTime": {"color": C.muted, "fontSize": F.xs, "width": 74},
         "slotBar": {"width": 3, "borderRadius": R.pill, "backgroundColor": C.accent},
         "slotBarBreak": {"backgroundColor": C.border},
+        "slotBarFixed": {"backgroundColor": C.danger},
+        "slotFixed": {"color": C.danger, "fontSize": F.md, "fontWeight": "600"},
         "streakStrip": {"flexDirection": "row", "gap": 3, "marginTop": S.sm},
         "streakCell": {"width": 12, "height": 12, "borderRadius": 3, "backgroundColor": C.surfaceAlt},
         "authWrap": {"flex": 1, "backgroundColor": C.bg, "justifyContent": "center", "padding": S.xl, "gap": S.md},

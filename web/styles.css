@@ -350,6 +350,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .slot-time { font-family: var(--mono); font-size: 11px; color: var(--faint); width: 96px; flex: none; padding-top: 3px; }
 .slot-bar { width: 2px; border-radius: 999px; background: var(--maize); flex: none; box-shadow: 0 0 9px rgba(255, 203, 5, 0.5); }
 .slot.is-break .slot-bar { background: var(--surface-3); box-shadow: none; }
+.slot.is-commitment { background: rgba(255, 107, 157, 0.07); }
+.slot.is-commitment .slot-bar { background: var(--pink); box-shadow: 0 0 9px rgba(255, 107, 157, 0.6); width: 3px; }
+.slot.is-commitment .slot-label { color: var(--pink); font-weight: 600; }
 .slot.is-past { opacity: 0.45; }
 .slot-label { font-weight: 500; }
 .slot.is-break .slot-label { color: var(--faint); font-weight: 400; }

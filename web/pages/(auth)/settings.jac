@@ -261,10 +261,12 @@ def:pub page -> JsxPage {
                         <div className="card-body stack-sm">
                             <div className="row spread">
                                 <div>
-                                    <div>Seed a sample term</div>
+                                    <div>Seed my Fall 2026 term</div>
                                     <div className="field-hint">
-                                        Four courses, ten tasks and three habits.
-                                        Refuses to run on an account with data.
+                                        The real thing: EECS 449, ECON 402 and
+                                        MIDEAST 207, with the deadlines off
+                                        their syllabi. Refuses to run on an
+                                        account that already has data.
                                     </div>
                                 </div>
                                 <button className="btn btn-sm" onClick={lambda { seed(); }}>

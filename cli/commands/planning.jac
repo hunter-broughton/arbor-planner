@@ -23,6 +23,7 @@ import from cli.commands.common {
     EXIT_OK,
     EXIT_USAGE,
     GREEN,
+    PINK,
     RED,
     YELLOW,
     clock,
@@ -45,6 +46,9 @@ def show_plan(blocks: list[any], summary: str) {
     }
     for block in blocks {
         label = block.label if block.kind == "focus" else paint(block.label, DIM);
+        if block.kind == "commitment" {
+            label = paint(block.label, PINK);
+        }
         print(
             "  "
                 + paint(clock(block.start_min) + "–" + clock(block.end_min), DIM)
@@ -59,10 +63,10 @@ def show_plan(blocks: list[any], summary: str) {
 }
 
 
-"""`hunt plan [--minutes N]` -- build today's schedule."""
-async def run_plan(minutes: int, show_only: bool) -> int {
+"""`hunt plan [--minutes N] [--date YYYY-MM-DD]` -- build a day's schedule."""
+async def run_plan(minutes: int, show_only: bool, date: str) -> int {
     try {
-        result = await get_day_plan("") if show_only else await plan_day("", minutes);
+        result = await get_day_plan(date) if show_only else await plan_day(date, minutes);
     } except Exception as e {
         return exit_code_for(e);
     }
@@ -79,10 +83,10 @@ async def run_plan(minutes: int, show_only: bool) -> int {
 }
 
 
-"""`hunt plan clear`."""
-async def run_clear_plan -> int {
+"""`hunt plan --clear`."""
+async def run_clear_plan(date: str) -> int {
     try {
-        outcome = await clear_day_plan("");
+        outcome = await clear_day_plan(date);
     } except Exception as e {
         return exit_code_for(e);
     }

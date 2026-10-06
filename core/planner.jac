@@ -1265,7 +1265,14 @@ def:protect remove_goal(goal_id: str) -> OpResult {
 }
 
 
-"""Fill an empty account with a believable term so the app can be explored.
+"""Fill an empty account with my actual Fall 2026 term.
+
+The courses and every EECS 449 deadline below are real, lifted from the
+published course schedule at github.com/marsninja/CSE449-F26 -- weekly
+snippets every Friday, the Monday/Wednesday group updates, MVP Pitch Week,
+Launch Week and Reflection Week. Dates are stored as offsets from the term
+calendar rather than hard-coded, so the fixture still lands sensibly whenever
+it is run.
 
 Refuses to run when the account already holds data, so it can never clobber
 real planning.
@@ -1277,13 +1284,13 @@ def:protect seed_demo -> OpResult {
         );
     }
     today = today_iso();
+    monday = week_start(today);
     settings = profile_node();
-    settings.display_name = settings.display_name or "Student";
+    settings.display_name = settings.display_name or "Hunter";
     catalog: list[tuple[str, str, int]] = [
-        ("EECS 449", "Conversational Artificial Intelligence", 4),
-        ("EECS 485", "Web Systems", 4),
-        ("EECS 445", "Introduction to Machine Learning", 4),
-        ("STATS 415", "Data Mining and Statistical Learning", 4)
+        ("EECS 449", "Principles and Practice of Agentic AI", 4),
+        ("ECON 402", "Intermediate Macroeconomic Theory", 4),
+        ("MIDEAST 207", "Middle East Studies", 3)
     ];
     made: dict[str, Course] = {};
     for (index, (code, title, credits)) in enumerate(catalog) {
@@ -1299,35 +1306,72 @@ def:protect seed_demo -> OpResult {
         ) as Course;
         made[code] = course;
     }
-    plan: list[tuple[str, str, str, str, int, int]] = [
-        ("EECS 449", "Extra credit: full-stack Jac planner", "project", "critical", 5, 300),
-        ("EECS 449", "Read the byLLM chapter before lecture", "reading", "medium", 1, 45),
-        ("EECS 485", "Project 3: client-side dynamic pages", "assignment", "high", 3, 240),
-        ("EECS 485", "Fix the flaky pagination test", "assignment", "medium", -1, 45),
-        ("EECS 445", "Problem set 4: SVMs and kernels", "assignment", "high", 2, 180),
-        ("EECS 445", "Midterm 1", "exam", "critical", 9, 300),
-        ("STATS 415", "Lab writeup: regression diagnostics", "assignment", "medium", 4, 90),
-        ("STATS 415", "Reading: chapters 6-7", "reading", "low", 6, 60),
-        ("", "Email advisor about winter registration", "admin", "high", 0, 15),
-        ("", "Groceries and meal prep", "personal", "low", 1, 60)
+    # (course, title, kind, priority, days from this Monday, minutes, time)
+    plan: list[tuple[str, str, str, str, int, int, str]] = [
+        (
+            "EECS 449",
+            "Weekly snippet: what I built and what I learned",
+            "admin",
+            "high",
+            4,
+            45,
+            "23:59"
+        ),
+        (
+            "EECS 449",
+            "Group update: 3-5 slides and a working demo",
+            "project",
+            "high",
+            2,
+            90,
+            "13:30"
+        ),
+        (
+            "EECS 449",
+            "Team project: move an issue through Flowline",
+            "project",
+            "medium",
+            3,
+            180,
+            ""
+        ),
+        ("EECS 449", "Read the byLLM docs before lecture", "reading", "medium", 1, 45, ""),
+        ("ECON 402", "Midterm 1", "exam", "critical", 2, 240, ""),
+        ("ECON 402", "Problem set: IS-LM and aggregate demand", "assignment", "high", 4, 120, "23:59"),
+        ("MIDEAST 207", "Response paper", "assignment", "medium", 4, 120, "23:59"),
+        ("MIDEAST 207", "Weekly reading", "reading", "medium", 1, 90, ""),
+        ("", "Email advisor about winter registration", "admin", "high", 0, 15, ""),
+        ("", "Groceries and meal prep", "personal", "low", 1, 60, "")
     ];
-    for (code, title, kind, priority, offset, minutes) in plan {
+    for (code, title, kind, priority, offset, minutes, at) in plan {
         create_task(
             title,
             "",
             kind,
             priority,
-            shift_days(today, offset),
-            "23:59" if kind == "assignment" else "",
+            shift_days(monday, offset),
+            at,
             minutes,
             made.get(code),
             "seed"
         );
     }
+    # The milestones that shape the rest of the semester.
+    milestones: list[tuple[str, str, int]] = [
+        ("MVP Pitch Week: launch-ready demo for the class", "project", 28),
+        ("Launch Week: push the marketing campaign live", "project", 42),
+        ("Reflection Week: what we built and what we learned", "project", 63)
+    ];
+    for (title, kind, offset) in milestones {
+        create_task(
+            title, "", kind, "high", shift_days(monday, offset), "", 240,
+            made.get("EECS 449"), "seed"
+        );
+    }
     habits: list[tuple[str, str, int]] = [
-        ("Move for 30 minutes", "daily", 1),
-        ("Read something not assigned", "daily", 1),
-        ("Office hours", "weekly", 2)
+        ("Write the weekly snippet", "weekly", 1),
+        ("Office hours (Tue/Thu 3-4, 4129 Lien)", "weekly", 1),
+        ("Move for 30 minutes", "daily", 1)
     ];
     for (index, (title, cadence, target)) in enumerate(habits) {
         goal = (
@@ -1346,9 +1390,10 @@ def:protect seed_demo -> OpResult {
             );
         }
     }
+    total = len(plan) + len(milestones);
     return OpResult(
         ok=True,
-        message=f"Seeded {len(catalog)} courses, {len(plan)} tasks and {len(habits)} habits."
+        message=f"Seeded {len(catalog)} courses, {total} tasks and {len(habits)} habits."
     );
 }
 

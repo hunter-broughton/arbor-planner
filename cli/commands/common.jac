@@ -314,7 +314,7 @@ def priority_text(priority: str) -> str {
 def task_line(task: TaskView) -> str {
     mark = paint("✔", GREEN) if task.done else "·";
     title = paint(fit(task.title, 38), DIM) if task.done else fit(task.title, 38);
-    course = paint(fit(task.course_code or "—", 9), BLUE);
+    course = paint(fit(task.course_code or "—", 12), BLUE);
     return (
         "  "
             + paint(short_id(task.id), DIM)

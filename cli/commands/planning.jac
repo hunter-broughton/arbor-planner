@@ -118,7 +118,7 @@ async def run_week(offset: int) -> int {
                 "      "
                     + paint(short_id(task.id), DIM)
                     + "  "
-                    + paint(fit(task.course_code or "—", 10), CYAN)
+                    + paint(fit(task.course_code or "—", 12), CYAN)
                     + fit(task.title, 42)
                     + "  "
                     + paint(duration(task.estimate_minutes), DIM)
@@ -154,7 +154,7 @@ async def run_courses -> int {
         flag = paint("  " + str(course.overdue) + " overdue", RED) if course.overdue else "";
         print(
             "  "
-                + paint(fit(course.code, 10), BOLD)
+                + paint(fit(course.code, 12), BOLD)
                 + fit(course.title, 42)
                 + paint(
                     str(course.open_tasks) + " open · " + duration(course.open_minutes),
